@@ -1,0 +1,12 @@
+firstName,lastName,email,company,position,salary
+Jan,Kowalski,jan.kowalski@techcorp.com,TechCorp,Prezes,27000
+Anna,Nowak,anna.nowak@techcorp.com,TechCorp,Manager,11500
+Piotr,Zieliński,piotr.zielinski@innovatech.com,InnovaTech,Programista,8500
+Katarzyna,Wójcik,katarzyna.wojcik@softdev.pl,SoftDev,Wiceprezes,17500
+Michał,Wiśniewski,michal.wisniewski@softdev.pl,SoftDev,Stażysta,2500
+Ewa,Nowicka,ewa.nowicka@fintechhub.com,FinTechHub,Programista,8000
+# błędne dane poniżej
+Adam,Nowak,adam.nowak@badcorp.com,BadCorp,CEO,30000
+Barbara,Krawczyk,barbara.krawczyk@badcorp.com,BadCorp,Manager,-5000
+Piotr,Zieliński,piotr.zielinski@innovatech.com,InnovaTech,Programista,9000
+,,brak.danych@fail.com,TechCorp,Stażysta,3000

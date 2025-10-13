@@ -1,5 +1,6 @@
 package com.example.zad1.service;
 
+import com.example.zad1.model.CompanyStatistics;
 import com.example.zad1.model.Employee;
 import com.example.zad1.model.Position;
 
@@ -58,5 +59,31 @@ public class EmployeeService {
 
     public Optional<Employee> getHighestSalary() {
         return employees.stream().max(Comparator.comparingInt(Employee::getSalary));
+    }
+
+    public List<Employee> validateSalaryConsistency(){
+        return employees.stream()
+                .filter(Objects::nonNull)
+                .filter(emp -> emp.getPosition() != null)
+                .filter(emp -> emp.getSalary() < emp.getPosition().getSalary())
+                .collect(Collectors.toList());
+    }
+
+    public Map<String, CompanyStatistics> getCompanyStatistics() {
+        return employees.stream()
+                .filter(Objects::nonNull)
+                .filter(emp -> emp.getCompanyName() != null && !emp.getCompanyName().isBlank())
+                .collect(Collectors.groupingBy(
+                        Employee::getCompanyName,
+                        Collectors.collectingAndThen(Collectors.toList(), list -> {
+                            int count = list.size();
+                            double avg = list.stream().mapToInt(Employee::getSalary).average().orElse(0.0);
+                            String topFullName = list.stream()
+                                    .max(Comparator.comparingInt(Employee::getSalary))
+                                    .map(Employee::getFullName)
+                                    .orElse("");
+                            return new CompanyStatistics(count, avg, topFullName);
+                        })
+                ));
     }
 }

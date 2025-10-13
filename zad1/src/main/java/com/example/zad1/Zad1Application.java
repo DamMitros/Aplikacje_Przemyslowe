@@ -6,8 +6,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import com.example.zad1.model.Employee;
 import com.example.zad1.model.Position;
+import com.example.zad1.model.ImportSummary;
+import com.example.zad1.model.CompanyStatistics;
 import com.example.zad1.service.EmployeeService;
+import com.example.zad1.service.ImportService;
+import com.example.zad1.service.ApiService;
 
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @SpringBootApplication
@@ -33,8 +40,8 @@ public class Zad1Application implements CommandLineRunner{
         service.addEmployee(new Employee("Anna Nowak", "nowaAnia@gmail.com", "ItTomans", Position.STAZYSTA, Position.STAZYSTA.getSalary()));
 
         System.out.println("Próba dodania pracownika z duplikatem email:");
-        boolean added = service.addEmployee(new Employee("Anna Nowak", "nowaAnia@gmail.com", "TechCorp", Position.WICEPREZES, Position.WICEPREZES.getSalary()));
-        if (!added) {
+        boolean add = service.addEmployee(new Employee("Anna Nowak", "nowaAnia@gmail.com", "TechCorp", Position.WICEPREZES, Position.WICEPREZES.getSalary()));
+        if (!add) {
             System.out.println("Nie można dodać pracownika z duplikatem email.");
         } else {
             System.out.println("Pracownik dodany mimo duplikatu.");
@@ -65,5 +72,42 @@ public class Zad1Application implements CommandLineRunner{
         System.out.println("\nPracownik z najwyższym wynagrodzeniem:");
         topEmployee = service.getHighestSalary();
         System.out.println(topEmployee.map(Employee::toString).orElse("Brak pracowników ."));
+
+        String csvPath = Paths.get("data", "employees.csv").toString();
+        ImportService importService = new ImportService(service);
+        ImportSummary summary = importService.importFromCsv(csvPath);
+        System.out.println("\nPodsumowanie importu z pliku CSV:");
+        if (!summary.getErrors().isEmpty()) {
+            System.out.println("Wystąpiły błędy podczas importu:");
+            summary.getErrors().forEach(System.out::println);
+        } else {
+            System.out.println("Import zakończony pomyślnie bez błędów.");
+        }
+
+        System.out.println("Liczba zaimportowanych pracowników: " + summary.getImportedCount());
+
+        ApiService apiService = new ApiService();
+        try {
+            List<Employee> apiEmployees = apiService.fetchEmployeesFromApi();
+            int added=0;
+            for (Employee emp : apiEmployees) {
+                if (service.addEmployee(emp)) {
+                    added++;
+                }
+            }
+            System.out.println("\nLiczba pracowników dodanych z API: " + added);
+        } catch (Exception e) {
+            System.out.println("Błąd podczas pobierania danych z API: " + e.getMessage());
+        }
+
+        System.out.println("\n Pracownicy z wynagrodzeniem niższym niż stawka bazowa dla ich stanowiska:");
+        service.validateSalaryConsistency().forEach(System.out::println);
+
+        System.out.println("\nStatystyki firmy:");
+        Map<String, CompanyStatistics> stats = service.getCompanyStatistics();
+        stats.forEach((company, stat) -> {
+            System.out.println(company + ": " + stat);
+        });
     }
+
 }
