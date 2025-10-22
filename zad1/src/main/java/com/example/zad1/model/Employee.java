@@ -23,14 +23,14 @@ public class Employee {
     public String getLastName() {
         if (fullName == null || fullName.isBlank())
             return "";
-        String[] parts = fullName.split(" ");
+        String[] parts = fullName.trim().split("\\s+");
         return parts.length > 1 ? parts[parts.length - 1] : "";
     }
     public String getFirstName() {
         if (fullName == null || fullName.isBlank())
             return "";
-        String[] parts = fullName.split(" ");
-        return parts.length > 0 ? parts[0] : "";
+        String[] parts = fullName.trim().split("\\s+");
+        return parts[0];
     }
     public String getEmail() {
         return email;

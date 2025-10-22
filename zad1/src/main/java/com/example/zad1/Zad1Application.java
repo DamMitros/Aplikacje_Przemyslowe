@@ -1,5 +1,6 @@
 package com.example.zad1;
 
+import com.example.zad1.exception.ApiException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -25,7 +26,7 @@ public class Zad1Application implements CommandLineRunner{
     }
 
     @Override
-    public void run(String... args) {
+    public void run(String... args) throws ApiException {
         EmployeeService service = new EmployeeService();
 
         System.out.println("Pracownik z najwyższym wynagrodzeniem (bez pracowników):");
@@ -38,14 +39,6 @@ public class Zad1Application implements CommandLineRunner{
         service.addEmployee(new Employee("Kasia Kowalska", "kasia.kowal@gmail.com", "ItTomans", Position.PROGRAMISTA, Position.PROGRAMISTA.getSalary()));
         service.addEmployee(new Employee("Marta Zalewska", "MartaZlewka@gmail.com", "TechCorp", Position.PROGRAMISTA, Position.PROGRAMISTA.getSalary()));
         service.addEmployee(new Employee("Anna Nowak", "nowaAnia@gmail.com", "ItTomans", Position.STAZYSTA, Position.STAZYSTA.getSalary()));
-
-        System.out.println("Próba dodania pracownika z duplikatem email:");
-        boolean add = service.addEmployee(new Employee("Anna Nowak", "nowaAnia@gmail.com", "TechCorp", Position.WICEPREZES, Position.WICEPREZES.getSalary()));
-        if (!add) {
-            System.out.println("Nie można dodać pracownika z duplikatem email.");
-        } else {
-            System.out.println("Pracownik dodany mimo duplikatu.");
-        }
 
         System.out.println("\nWszyscy pracownicy:");
         service.displayAll();
@@ -77,29 +70,18 @@ public class Zad1Application implements CommandLineRunner{
         ImportService importService = new ImportService(service);
         ImportSummary summary = importService.importFromCsv(csvPath);
         System.out.println("\nPodsumowanie importu z pliku CSV:");
-        if (!summary.getErrors().isEmpty()) {
-            System.out.println("Wystąpiły błędy podczas importu:");
-            summary.getErrors().forEach(System.out::println);
-        } else {
-            System.out.println("Import zakończony pomyślnie bez błędów.");
-        }
+        System.out.println("Wystąpiły błędy podczas importu:");
+        summary.getErrors().forEach(System.out::println);
 
         System.out.println("Liczba zaimportowanych pracowników: " + summary.getImportedCount());
 
         ApiService apiService = new ApiService();
-        try {
-            List<Employee> apiEmployees = apiService.fetchEmployeesFromApi();
-            int added=0;
-            for (Employee emp : apiEmployees) {
-                if (service.addEmployee(emp)) {
-                    added++;
-                }
-            }
-            System.out.println("\nLiczba pracowników dodanych z API: " + added);
-        } catch (Exception e) {
-            System.out.println("Błąd podczas pobierania danych z API: " + e.getMessage());
-        }
 
+        List<Employee> apiEmployees = apiService.fetchEmployeesFromApi();
+        int added=0;
+        for (Employee emp : apiEmployees) {added++;}
+
+        System.out.println("\nLiczba pracowników dodanych z API: " + added);
         System.out.println("\n Pracownicy z wynagrodzeniem niższym niż stawka bazowa dla ich stanowiska:");
         service.validateSalaryConsistency().forEach(System.out::println);
 

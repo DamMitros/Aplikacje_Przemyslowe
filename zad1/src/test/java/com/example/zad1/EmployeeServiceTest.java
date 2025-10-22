@@ -18,63 +18,76 @@ public class EmployeeServiceTest {
     }
 
     @Test
-    void testAddEmployee() {
+    void shouldAddEmployeeWhenEmployeeValid() {
         assertTrue(employeeService.addEmployee(emp));
     }
 
     @Test
-    void testAddEmployee_DuplicateEmail() {
+    void shouldNotAddEmployeeWhenEmployeeDuplicate() {
         employeeService.addEmployee(emp);
         assertFalse(employeeService.addEmployee(emp));
     }
 
     @Test
-    void testNullEmployee() {
+    void shouldNotAddEmployeeWhenEmployeeIsNull() {
         assertFalse(employeeService.addEmployee(null));
     }
 
     @Test
-    void testEmptyMail() {
+    void shouldNotAddEmployeeWhenEmailIsNull() {
+        Employee empInvalidEmail = new Employee("Anna Nowak", null, "TechCorp", Position.WICEPREZES, Position.WICEPREZES.getSalary());
+        assertFalse(employeeService.addEmployee(empInvalidEmail));
+    }
+
+
+    @Test
+    void shouldNotAddEmployeeWhenEmailIsBlank() {
         Employee emp2 = new Employee("Anna Nowak", "", "TechCorp", Position.WICEPREZES, Position.WICEPREZES.getSalary());
         assertFalse(employeeService.addEmployee(emp2));
     }
 
     @Test
-    void testGetHighestSalary_NoEmployees() {
-        assertTrue(employeeService.getHighestSalary().isEmpty());
+    void displayAllWhenNoEmployees() {
+        employeeService.displayAll();
     }
 
     @Test
-    void testGetHighestSalary_WithEmployees() {
+    void displayAllWhenEmployeesExist() {
         employeeService.addEmployee(emp);
-        employeeService.getHighestSalary();
-        assertFalse(employeeService.getHighestSalary().isEmpty());
+        employeeService.addEmployee(emp2);
+        employeeService.displayAll();
     }
 
     @Test
-    void testGetAverageSalary_NoEmployees() {
-        assertEquals(0.0, employeeService.getAverageSalary());
-    }
-
-    @Test
-    void testGetAverageSalary_WithEmployees() {
-        employeeService.addEmployee(emp);
-        assertEquals(Position.PREZES.getSalary(), employeeService.getAverageSalary());
-    }
-
-    @Test
-    void testGetEmployeeByCompany_NoCompany() {
+    void getEmployeeByCompany_WhenNonExistingCompany() {
         assertTrue(employeeService.getEmployeeByCompany("NonExistent").isEmpty());
     }
 
     @Test
-    void testGetEmployeeByCompany_WithCompany() {
+    void getEmployeeByCompany_WhenExistingCompany() {
         employeeService.addEmployee(emp);
         assertFalse(employeeService.getEmployeeByCompany("TechCorp").isEmpty());
     }
 
     @Test
-    void testGetAlphabetically() {
+    void getEmployeeByCompanyWhenCompanyNameIsNull() {
+        assertTrue(employeeService.getEmployeeByCompany(null).isEmpty());
+    }
+
+    @Test
+    void getEmployeeByCompany_WhenCompanyIsBlank() {
+        assertTrue(employeeService.getEmployeeByCompany("").isEmpty());
+    }
+
+    @Test
+    void getEmployeeByCompany_WhenEmployeeHasNullCompany() {
+        Employee empNoCompany = new Employee("Roberta Svietlova", "svietlova@outlook.ru", null, Position.MANAGER, Position.MANAGER.getSalary());
+        employeeService.addEmployee(empNoCompany);
+        assertTrue(employeeService.getEmployeeByCompany("TechnoCrop").isEmpty());
+    }
+
+    @Test
+    void getAlphabetically() {
         employeeService.addEmployee(emp);
         employeeService.addEmployee(emp2);
         assertEquals(2, employeeService.getAlphabetically().size());
@@ -82,7 +95,7 @@ public class EmployeeServiceTest {
     }
 
     @Test
-    void testGroupByPosition() {
+    void groupByPosition() {
         employeeService.addEmployee(emp);
         employeeService.addEmployee(emp2);
         assertEquals(2, employeeService.groupByPosition().size());
@@ -91,11 +104,71 @@ public class EmployeeServiceTest {
     }
 
     @Test
-    void testCountByPosition() {
+    void countByPosition() {
         employeeService.addEmployee(emp);
         employeeService.addEmployee(emp2);
         assertEquals(2, employeeService.countByPosition().size());
         assertEquals(1, employeeService.countByPosition().get(Position.PREZES));
         assertEquals(1, employeeService.countByPosition().get(Position.WICEPREZES));
+    }
+
+    @Test
+    void getAverageSalary_WhenNoEmployees() {
+        assertEquals(0.0, employeeService.getAverageSalary());
+    }
+
+    @Test
+    void getAverageSalary_WhenAddedEmployees() {
+        employeeService.addEmployee(emp);
+        assertEquals(Position.PREZES.getSalary(), employeeService.getAverageSalary());
+    }
+
+    @Test
+    void getHighestSalary_WhenNoEmployee() {
+        assertTrue(employeeService.getHighestSalary().isEmpty());
+    }
+
+    @Test
+    void getHighestSalary_WhenAddedEmployee() {
+        employeeService.addEmployee(emp);
+        employeeService.getHighestSalary();
+        assertFalse(employeeService.getHighestSalary().isEmpty());
+    }
+
+    @Test
+    void testValidateSalaryConsistency() {
+        Employee empNullPosition = new Employee("Svietlana Gerasimova", "svietla@outlook.com", "TechnoCorp", null, 3600);
+        Employee empInvalidSalary = new Employee("Igor Ivanov", "igorek@outlook.ru", "TechnoCorp", Position.STAZYSTA, 29);
+        employeeService.addEmployee(emp);
+        employeeService.addEmployee(empNullPosition);
+        employeeService.addEmployee(empInvalidSalary);
+        assertEquals(1, employeeService.validateSalaryConsistency().size());
+    }
+
+    @Test
+    void testGetCompanyStatisticsWhenEmployeesHasNoCompany(){
+        Employee empNoCompany = new Employee("Roberta Svietlova", "robertica@pl.ru", "", Position.MANAGER, Position.MANAGER.getSalary());
+        employeeService.addEmployee(empNoCompany);
+        assertTrue(employeeService.getCompanyStatistics().isEmpty());
+    }
+
+    @Test
+    void testGetCompanyStatisticsWhenEmployeesHasNullCompany(){
+        Employee empNullCompany = new Employee("Olga Petrova", "petrovia@outlook.ru", null, Position.PROGRAMISTA, Position.PROGRAMISTA.getSalary());
+        employeeService.addEmployee(empNullCompany);
+        assertTrue(employeeService.getCompanyStatistics().isEmpty());
+    }
+
+    @Test
+    void testGetCompanyStatisticsWhenNoEmployees() {
+        assertTrue(employeeService.getCompanyStatistics().isEmpty());
+    }
+
+    @Test
+    void testGetCompanyStatisticsWhenAddedEmployees() {
+        employeeService.addEmployee(emp);
+        employeeService.addEmployee(emp2);
+        assertEquals(1, employeeService.getCompanyStatistics().size());
+        assertTrue(employeeService.getCompanyStatistics().containsKey("TechCorp"));
     }
 }

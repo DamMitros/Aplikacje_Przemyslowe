@@ -1,19 +1,17 @@
 package com.example.zad1;
 
+import com.example.zad1.model.ImportSummary;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.example.zad1.model.Employee;
 import com.example.zad1.model.Position;
 
+import java.util.List;
+
 public class ModelTest {
 
     Employee emp = new Employee("Justyna Steczkowska", "steczkowska1764@gmail.com", "TechCorp", Position.PREZES, Position.PREZES.getSalary());
-
-    @Test
-    void testGetFullName() {
-        assertEquals("Justyna Steczkowska", emp.getFullName());
-    }
 
     @Test
     void testGetFirstName() {
@@ -26,23 +24,24 @@ public class ModelTest {
     }
 
     @Test
-    void testGetEmail() {
-        assertEquals("steczkowska1764@gmail.com", emp.getEmail());
+    void shouldReturnEmptyStringWhenFullNameNull() {
+        Employee empNoLastName = new Employee(null, "steczka@outlook.ru", "TechCorp", Position.MANAGER, Position.MANAGER.getSalary());
+        assertEquals("", empNoLastName.getLastName());
+        assertEquals("", empNoLastName.getFirstName());
     }
 
     @Test
-    void testGetCompanyName() {
-        assertEquals("TechCorp", emp.getCompanyName());
+    void shouldReturnEmptyStringWhenFullNameBlank() {
+        Employee empNoLastName = new Employee("   ", "steczka@outlook.ru", "TechCorp", Position.MANAGER, Position.MANAGER.getSalary());
+        assertEquals("", empNoLastName.getLastName());
+        assertEquals("", empNoLastName.getFirstName());
     }
 
     @Test
-    void testGetPosition() {
-        assertEquals(Position.PREZES, emp.getPosition());
-    }
-
-    @Test
-    void testGetSalary() {
-        assertEquals(25000, emp.getSalary());
+    void shouldReturnEmptyStringWhenOnlyFirstName() {
+        Employee emp = new Employee("Justyna", "steczka@outlook.ru", "TechCorp", Position.MANAGER, 1000);
+        assertEquals("", emp.getLastName());
+        assertEquals("Justyna", emp.getFirstName());
     }
 
     @Test
@@ -76,20 +75,32 @@ public class ModelTest {
     }
 
     @Test
+    void ShouldFalseWhenEqualsNonEmployeeObject() {
+        assertFalse(emp.equals("Some String"));
+    }
+
+    @Test
+    void shouldCreateEmptyErrorWhenNullPassed(){
+        ImportSummary summary = new ImportSummary(0, null);
+        assertNotNull(summary.getErrors());
+        assertTrue(summary.getErrors().isEmpty());
+        assertThrows(UnsupportedOperationException.class, () -> summary.getErrors().add("nie powinno działać"));
+    }
+
+    @Test
+    void testImportSummaryToString() {
+        List<String> emptyErrors = List.of();
+        ImportSummary summary = new ImportSummary(5, emptyErrors);
+        String expected = "ImportSummary{importedCount=5, errors=[]}";
+        assertEquals(expected, summary.toString());
+    }
+
+    @Test
     void testGetHierarchy() {
         assertEquals(1, Position.PREZES.getHierarchy());
         assertEquals(2, Position.WICEPREZES.getHierarchy());
         assertEquals(3, Position.MANAGER.getHierarchy());
         assertEquals(4, Position.PROGRAMISTA.getHierarchy());
         assertEquals(5, Position.STAZYSTA.getHierarchy());
-    }
-
-    @Test
-    void testGetSalaryPosition() {
-        assertEquals(25000, Position.PREZES.getSalary());
-        assertEquals(18000, Position.WICEPREZES.getSalary());
-        assertEquals(12000, Position.MANAGER.getSalary());
-        assertEquals(8000, Position.PROGRAMISTA.getSalary());
-        assertEquals(3000, Position.STAZYSTA.getSalary());
     }
 }

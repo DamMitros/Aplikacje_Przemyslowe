@@ -17,12 +17,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ApiService {
-    private static final String URL = "https://jsonplaceholder.typicode.com/users";
+    private static final String DEFAULT_URL = "https://jsonplaceholder.typicode.com/users";
+
+    private final HttpClient client;
+    private final String url;
+
+    public ApiService() {
+        this(HttpClient.newHttpClient(), DEFAULT_URL);
+    }
+
+    public ApiService(HttpClient client, String url) {
+        this.client = client;
+        this.url = url;
+    }
 
     public List<Employee> fetchEmployeesFromApi() throws ApiException {
         try {
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder(URI.create(URL)).GET().build();
+            HttpRequest request = HttpRequest.newBuilder(URI.create(url)).GET().build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             int statusCode = response.statusCode();
@@ -38,8 +49,13 @@ public class ApiService {
 
                 String fullName = safeGetAsString(obj, "name");
                 String email = safeGetAsString(obj, "email");
-                String companyName = safeGetAsString(obj.getAsJsonObject("company"), "name");
+                JsonObject companyObj = null;
+                JsonElement companyEl = obj.get("company");
+                if (companyEl != null && !companyEl.isJsonNull() && companyEl.isJsonObject()) {
+                    companyObj = companyEl.getAsJsonObject();
+                }
 
+                String companyName = safeGetAsString(companyObj, "name");
                 Position position = Position.PROGRAMISTA;
                 int salary = position.getSalary();
 

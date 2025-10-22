@@ -7,8 +7,10 @@
 
 - Budowa i testy:
     - `./gradlew build` - buduje projekt
+    -  `./gradlew clean` - czyści folder `/build` projekt
     - `./gradlew test` - uruchamia testy jednostkowe
-
+    - `./gradlew check` - uruchamia wszystkie kontrole jakości kodu
+    - `./gradlew jacocoTestReport` - generuje raport pokrycia testami
 - Uruchomienie:
 -   - `./gradlew Bootrun` - uruchamia aplikację
 

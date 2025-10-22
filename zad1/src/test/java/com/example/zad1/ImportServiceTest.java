@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ImportServiceTest {
 
     @Test
-    void testImportFromCsv_SummaryAndAnalytics() {
+    void shouldHandleWhenCSVisValid() {
         EmployeeService employeeService = new EmployeeService();
         ImportService importService = new ImportService(employeeService);
 
@@ -34,5 +34,31 @@ public class ImportServiceTest {
         assertEquals(2, techCorp.getEmployeeCount());
         assertEquals(19250.0, techCorp.getAverageSalary(), 0.001);
         assertEquals("Jan Kowalski", techCorp.getTopEarnerFullName());
+    }
+
+    @Test
+    void shouldHandleWhenCSVisEmpty() {
+        EmployeeService employeeService = new EmployeeService();
+        ImportService importService = new ImportService(employeeService);
+
+        String csvPath = Paths.get("data", "empty.csv").toString();
+        ImportSummary sum = importService.importFromCsv(csvPath);
+
+        assertEquals(0, sum.getImportedCount());
+        assertEquals(1, sum.getErrors().size());
+        assertEquals("Plik jest pusty", sum.getErrors().get(0));
+    }
+
+    @Test
+    void shouldHandleWhenCSVisNotExist() {
+        EmployeeService employeeService = new EmployeeService();
+        ImportService importService = new ImportService(employeeService);
+
+        String csvPath = Paths.get("data", "nonexistent.csv").toString();
+        ImportSummary sum = importService.importFromCsv(csvPath);
+
+        assertEquals(0, sum.getImportedCount());
+        assertEquals(1, sum.getErrors().size());
+        assertTrue(sum.getErrors().get(0).startsWith("Błąd podczas odczytu pliku:"));
     }
 }
