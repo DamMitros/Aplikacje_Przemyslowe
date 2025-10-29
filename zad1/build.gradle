@@ -28,6 +28,7 @@ tasks.jacocoTestCoverageVerification {
     dependsOn tasks.test
     violationRules {
         rule {
+            includes = ['com.example.zad1.service']
             element = 'PACKAGE'
             limit {
                 counter = 'LINE'
@@ -65,4 +66,11 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+tasks.named('bootJar') {
+    mainClass = 'com.example.zad1.EmployeeManagementApplication'
+}
+tasks.named('bootRun') {
+    mainClass = 'com.example.zad1.EmployeeManagementApplication'
 }

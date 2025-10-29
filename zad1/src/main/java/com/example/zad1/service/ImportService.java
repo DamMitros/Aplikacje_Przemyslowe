@@ -5,6 +5,8 @@ import com.example.zad1.model.ImportSummary;
 import com.example.zad1.model.Position;
 import com.example.zad1.model.Employee;
 
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.io.BufferedReader;
@@ -13,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+@Service
 public class ImportService {
     private final EmployeeService employeeService;
 

@@ -188,7 +188,6 @@ public class ApiServiceTest {
         assertNull(emp.getCompanyName());
     }
 
-    // Java
     @Test
     void shouldHandleCompanyObject_withNullCompanyName() throws Exception {
         String json = """

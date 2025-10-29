@@ -6,7 +6,9 @@ import com.example.zad1.model.Position;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
 
+@Service
 public class EmployeeService {
     private final Set<Employee> employees = new HashSet<>();
 

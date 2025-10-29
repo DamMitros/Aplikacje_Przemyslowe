@@ -3,11 +3,13 @@ package com.example.zad1.service;
 import com.example.zad1.exception.ApiException;
 import com.example.zad1.model.Employee;
 import com.example.zad1.model.Position;
-
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -16,18 +18,22 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class ApiService {
-    private static final String DEFAULT_URL = "https://jsonplaceholder.typicode.com/users";
-
     private final HttpClient client;
+    private final Gson gson;
     private final String url;
 
-    public ApiService() {
-        this(HttpClient.newHttpClient(), DEFAULT_URL);
+    @Autowired
+    public ApiService(HttpClient client, Gson gson, @Value("${app.api.url}") String url) {
+        this.client = client;
+        this.gson = gson;
+        this.url = url;
     }
 
     public ApiService(HttpClient client, String url) {
         this.client = client;
+        this.gson = new Gson();
         this.url = url;
     }
 
@@ -42,11 +48,11 @@ public class ApiService {
             }
 
             String responseBody = response.body();
-            JsonArray arr = JsonParser.parseString(responseBody).getAsJsonArray();
+            JsonArray arr = gson.fromJson(responseBody, JsonArray.class);
+
             List<Employee> result = new ArrayList<>();
             for (JsonElement elem : arr) {
                 JsonObject obj = elem.getAsJsonObject();
-
                 String fullName = safeGetAsString(obj, "name");
                 String email = safeGetAsString(obj, "email");
                 JsonObject companyObj = null;
@@ -54,7 +60,6 @@ public class ApiService {
                 if (companyEl != null && !companyEl.isJsonNull() && companyEl.isJsonObject()) {
                     companyObj = companyEl.getAsJsonObject();
                 }
-
                 String companyName = safeGetAsString(companyObj, "name");
                 Position position = Position.PROGRAMISTA;
                 int salary = position.getSalary();
