@@ -1,9 +1,7 @@
-package com.example.zad1;
+package com.example.zad1.service;
 
 import com.example.zad1.model.CompanyStatistics;
 import com.example.zad1.model.ImportSummary;
-import com.example.zad1.service.EmployeeService;
-import com.example.zad1.service.ImportService;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Paths;

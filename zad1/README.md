@@ -1,5 +1,23 @@
-**System zarządzania pracownikami: CSV, API + Analizy**
+# **System zarządzania pracownikami: CSV, API + Analizy**
 
+## Lista dostępnych endpointów (skrót)
+- Employees
+    - GET `/api/employees`
+    - GET `/api/employees?company={company}`
+    - GET `/api/employees/{email}`
+    - POST `/api/employees`
+    - PUT `/api/employees/{email}`
+    - PATCH `/api/employees/{email}/status`
+    - DELETE `/api/employees/{email}`
+    - GET `/api/employees/status/{status}`
+- Statistics
+    - GET `/api/statistics/salary/average`
+    - GET `/api/statistics/salary/average?company={company}`
+    - GET `/api/statistics/company/{companyName}`
+    - GET `/api/statistics/positions`
+    - GET `/api/statistics/status`
+
+## Opis projektu
 - Wymagania: 
     - JDK 17+
     - Dostęp do internetu (dla API)

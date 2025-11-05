@@ -1,8 +1,7 @@
-package com.example.zad1;
+package com.example.zad1.service;
 
 import com.example.zad1.exception.ApiException;
 import com.example.zad1.model.Employee;
-import com.example.zad1.service.ApiService;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;

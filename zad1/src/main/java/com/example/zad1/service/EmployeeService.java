@@ -3,6 +3,7 @@ package com.example.zad1.service;
 import com.example.zad1.model.CompanyStatistics;
 import com.example.zad1.model.Employee;
 import com.example.zad1.model.Position;
+import com.example.zad1.model.EmploymentStatus;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,6 +17,35 @@ public class EmployeeService {
         if (employee==null || employee.getEmail()==null || employee.getEmail().isBlank())
             return false;
         return employees.add(employee);
+    }
+    public List<Employee> getAllEmployees() {
+        return new ArrayList<>(employees);
+    }
+    public Optional<Employee> GetEmployeeByEmail(String email){
+        if (email == null || email.isBlank()) return Optional.empty();
+        return employees.stream().filter(emp -> email.equalsIgnoreCase(emp.getEmail())).findFirst();
+    }
+    public Optional<Employee> UpdateEmployeeByEmail(String email, Employee changes) {
+        if (email == null || email.isBlank() || changes == null) return Optional.empty();
+        Optional<Employee> empOpt = GetEmployeeByEmail(email);
+        empOpt.ifPresent(emp -> {
+            emp.setFullName(changes.getFullName());
+            emp.setCompanyName(changes.getCompanyName());
+            emp.setPosition(changes.getPosition());
+            emp.setSalary(changes.getSalary());
+            emp.setStatus(changes.getStatus());
+        });
+        return empOpt;
+    }
+    public Optional<Employee> updateStatusByEmail(String email, EmploymentStatus status){
+        if (email==null || email.isBlank() || status==null) return Optional.empty();
+        Optional<Employee> empOpt = GetEmployeeByEmail(email);
+        empOpt.ifPresent(emp -> emp.setStatus(status));
+        return empOpt;
+    }
+    public boolean deleteEmployeeByEmail(String email) {
+        if (email==null || email.isBlank()) return false;
+        return employees.removeIf(emp -> email.equalsIgnoreCase(emp.getEmail()));
     }
 
     public void displayAll(){
@@ -34,6 +64,19 @@ public class EmployeeService {
                         emp.getCompanyName() != null &&
                         emp.getCompanyName().equalsIgnoreCase(companyName))
                 .collect(Collectors.toList());
+    }
+
+    public double getAverageSalaryByCompany(String companyName) {
+        return getEmployeeByCompany(companyName).stream().mapToInt(Employee::getSalary).average().orElse(0.0);
+    }
+
+    public List<Employee> getByStatus(EmploymentStatus status) {
+        if (status == null) return Collections.emptyList();
+        return employees.stream().filter(e -> e.getStatus() == status).collect(Collectors.toList());
+    }
+
+    public Map<EmploymentStatus, Integer> countByStatus() {
+        return employees.stream().collect(Collectors.groupingBy(Employee::getStatus, Collectors.summingInt(e -> 1)));
     }
 
     public List<Employee> getAlphabetically(){
@@ -80,11 +123,17 @@ public class EmployeeService {
                         Collectors.collectingAndThen(Collectors.toList(), list -> {
                             int count = list.size();
                             double avg = list.stream().mapToInt(Employee::getSalary).average().orElse(0.0);
-                            String topFullName = list.stream()
+                            Employee topEarner = list.stream()
                                     .max(Comparator.comparingInt(Employee::getSalary))
-                                    .map(Employee::getFullName)
-                                    .orElse("");
-                            return new CompanyStatistics(count, avg, topFullName);
+                                    .orElse(null);
+                            String topEarnerName = topEarner != null ? topEarner.getFullName() : "";
+                            int highestSalary = 0;
+                            if (topEarnerName != null) {
+                                assert topEarner != null;
+                                highestSalary = topEarner.getSalary();
+                            }
+
+                            return new CompanyStatistics(count, avg, topEarnerName, highestSalary);
                         })
                 ));
     }

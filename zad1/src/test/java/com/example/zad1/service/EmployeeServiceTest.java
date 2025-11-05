@@ -1,9 +1,8 @@
-package com.example.zad1;
+package com.example.zad1.service;
 
 import com.example.zad1.model.Employee;
 import com.example.zad1.model.Position;
 
-import com.example.zad1.service.EmployeeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;

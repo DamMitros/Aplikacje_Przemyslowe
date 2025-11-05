@@ -8,6 +8,7 @@ public class Employee {
     private String companyName;
     private Position position;
     private int salary;
+    private EmploymentStatus status = EmploymentStatus.ACTIVE;
 
     public Employee(String fullName, String email, String companyName, Position position, int salary) {
         this.fullName = fullName;
@@ -44,6 +45,9 @@ public class Employee {
     public int getSalary() {
         return salary;
     }
+    public EmploymentStatus getStatus() {
+        return status;
+    }
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
@@ -59,6 +63,9 @@ public class Employee {
     }
     public void setSalary(int salary) {
         this.salary = salary;
+    }
+    public void setStatus(EmploymentStatus status) {
+        this.status = status;
     }
 
     @Override
