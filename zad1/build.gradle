@@ -60,7 +60,12 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'com.itextpdf:kernel:8.0.3'
+    implementation 'com.itextpdf:layout:8.0.3'
+    implementation 'com.itextpdf:io:8.0.3'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-inline:5.2.0'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 

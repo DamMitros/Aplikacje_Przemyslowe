@@ -1,10 +1,16 @@
 package com.example.zad1.service;
 
 import com.example.zad1.model.Employee;
+import com.example.zad1.model.EmploymentStatus;
 import com.example.zad1.model.Position;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
+import java.util.List;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EmployeeServiceTest {
@@ -169,5 +175,111 @@ public class EmployeeServiceTest {
         employeeService.addEmployee(emp2);
         assertEquals(1, employeeService.getCompanyStatistics().size());
         assertTrue(employeeService.getCompanyStatistics().containsKey("TechCorp"));
+    }
+
+    @Test
+    void testGetAllEmployees() {
+        employeeService.addEmployee(emp);
+        employeeService.addEmployee(emp2);
+        List<Employee> all = employeeService.getAllEmployees();
+        assertEquals(2, all.size());
+        assertTrue(all.contains(emp));
+        assertTrue(all.contains(emp2));
+    }
+
+    @Test
+    void testGetByStatus() {
+        emp.setStatus(EmploymentStatus.ACTIVE);
+        emp2.setStatus(EmploymentStatus.TERMINATED);
+        employeeService.addEmployee(emp);
+        employeeService.addEmployee(emp2);
+
+        List<Employee> active = employeeService.getByStatus(EmploymentStatus.ACTIVE);
+        assertEquals(1, active.size());
+        assertEquals(emp, active.get(0));
+    }
+
+    @Test
+    void testCountByStatus() {
+        emp.setStatus(EmploymentStatus.ACTIVE);
+        emp2.setStatus(EmploymentStatus.ACTIVE);
+        employeeService.addEmployee(emp);
+        employeeService.addEmployee(emp2);
+
+        Map<EmploymentStatus, Integer> counts = employeeService.countByStatus();
+        assertEquals(1, counts.size());
+        assertEquals(2, counts.get(EmploymentStatus.ACTIVE));
+    }
+
+    @Test
+    void testGetEmployeeByEmail() {
+        employeeService.addEmployee(emp);
+        Optional<Employee> found = employeeService.GetEmployeeByEmail(emp.getEmail());
+        assertTrue(found.isPresent());
+        assertEquals(emp, found.get());
+    }
+
+    @Test
+    void testGetAverageSalaryByCompany() {
+        employeeService.addEmployee(emp);
+        employeeService.addEmployee(emp2);
+        double avg = employeeService.getAverageSalaryByCompany("TechCorp");
+        assertEquals((emp.getSalary() + emp2.getSalary()) / 2.0, avg);
+    }
+
+    @Test
+    void testUpdateStatusByEmail() {
+        employeeService.addEmployee(emp);
+        employeeService.updateStatusByEmail(emp.getEmail(), EmploymentStatus.TERMINATED);
+        Optional<Employee> updated = employeeService.GetEmployeeByEmail(emp.getEmail());
+        assertTrue(updated.isPresent());
+        assertEquals(EmploymentStatus.TERMINATED, updated.get().getStatus());
+    }
+
+    @Test
+    void testDeleteEmployeeByEmail() {
+        employeeService.addEmployee(emp);
+        assertTrue(employeeService.deleteEmployeeByEmail(emp.getEmail()));
+        assertFalse(employeeService.getAllEmployees().contains(emp));
+
+        assertFalse(employeeService.deleteEmployeeByEmail("nonexistent@email.com"));
+    }
+
+    @Test
+    void testUpdateEmployeeByEmailSuccess() {
+        employeeService.addEmployee(emp);
+        Employee changes = new Employee("Justyna Nowa", "steczkowska1764@gmail.com", "NewCorp", Position.MANAGER, 5000);
+        changes.setStatus(EmploymentStatus.TERMINATED);
+
+        Optional<Employee> updated = employeeService.UpdateEmployeeByEmail(emp.getEmail(), changes);
+        assertTrue(updated.isPresent());
+
+        Employee result = updated.get();
+        assertEquals("Justyna Nowa", result.getFullName());
+        assertEquals("NewCorp", result.getCompanyName());
+        assertEquals(Position.MANAGER, result.getPosition());
+        assertEquals(5000, result.getSalary());
+        assertEquals(EmploymentStatus.TERMINATED, result.getStatus());
+    }
+
+    @Test
+    void testUpdateEmployeeByEmailNonExistingEmail() {
+        Employee changes = new Employee("Anna Nowak", "anna@nowak.com", "CorpX", Position.MANAGER, 4000);
+        Optional<Employee> updated = employeeService.UpdateEmployeeByEmail("nonexistent@email.com", changes);
+        assertTrue(updated.isEmpty());
+    }
+
+    @Test
+    void testUpdateEmployeeByEmailNullEmail() {
+        Employee changes = new Employee("Anna Nowak", "anna@nowak.com", "CorpX", Position.MANAGER, 4000);
+        Optional<Employee> updated = employeeService.UpdateEmployeeByEmail(null, changes);
+        assertTrue(updated.isEmpty());
+    }
+
+    @Test
+    void testUpdateEmployeeByEmailNullChanges() {
+        employeeService.addEmployee(emp);
+        Optional<Employee> updated = employeeService.UpdateEmployeeByEmail(emp.getEmail(), null);
+        assertTrue(updated.isEmpty());
     }
 }

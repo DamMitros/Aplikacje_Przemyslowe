@@ -16,6 +16,17 @@
     - GET `/api/statistics/company/{companyName}`
     - GET `/api/statistics/positions`
     - GET `/api/statistics/status`
+- Files
+    - POST `/api/files/import/csv` 
+    - POST `/api/files/import/xml` 
+    - GET `/api/files/export/csv` 
+    - GET `/api/files/reports/statistics/{companyName}` 
+    - POST `/api/files/documents/{email}?type={DocumentType}` 
+    - GET `/api/files/documents/{email}` 
+    - GET `/api/files/documents/{email}/{documentId}`
+    - DELETE `/api/files/documents/{email}/{documentId}` 
+    - POST `/api/files/photos/{email}` 
+    - GET `/api/files/photos/{email}` 
 
 ## Opis projektu
 - Wymagania: 

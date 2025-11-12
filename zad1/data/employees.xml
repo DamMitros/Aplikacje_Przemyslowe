@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<employees>
+  <!-- Valid employees -->
+  <employee>
+    <firstName>Jan</firstName>
+    <lastName>Kowalski</lastName>
+    <email>jan.kowalski@techcorp.com</email>
+    <companyName>TechCorp</companyName>
+    <position>PREZES</position>
+    <salary>27000</salary>
+  </employee>
+  <employee>
+    <firstName>Anna</firstName>
+    <lastName>Nowak</lastName>
+    <email>anna.nowak@techcorp.com</email>
+    <companyName>TechCorp</companyName>
+    <position>MANAGER</position>
+    <salary>11500</salary>
+  </employee>
+  <employee>
+    <firstName>Piotr</firstName>
+    <lastName>Zieliński</lastName>
+    <email>piotr.zielinski@innovatech.com</email>
+    <companyName>InnovaTech</companyName>
+    <position>PROGRAMISTA</position>
+    <salary>8500</salary>
+  </employee>
+  <employee>
+    <firstName>Michał</firstName>
+    <lastName>Wiśniewski</lastName>
+    <email>michal.wisniewski@softdev.pl</email>
+    <companyName>SoftDev</companyName>
+    <position>STAZYSTA</position>
+    <salary>2500</salary>
+  </employee>
+  <employee>
+    <firstName>Ewa</firstName>
+    <lastName>Nowicka</lastName>
+    <email>ewa.nowicka@fintechhub.com</email>
+    <companyName>FinTechHub</companyName>
+    <position>PROGRAMISTA</position>
+    <salary>8000</salary>
+  </employee>
+
+    <!-- Invalid entries to generate errors (>=6) -->
+  <employee>
+    <firstName>Katarzyna</firstName>
+    <lastName>Wójcik</lastName>
+    <email>katarzyna.wojcik@softdev.pl</email>
+    <companyName>SoftDev</companyName>
+    <position>WICEPREZES</position>
+    <salary>x</salary>
+  </employee>
+
+  <employee>
+    <firstName>Adam</firstName>
+    <lastName>Nowak</lastName>
+    <email>adam.nowak@badcorp.com</email>
+    <companyName>BadCorp</companyName>
+    <position>CEO</position>
+    <salary>30000</salary>
+  </employee>
+
+  <employee>
+    <firstName>Barbara</firstName>
+    <lastName>Krawczyk</lastName>
+    <email>barbara.krawczyk@badcorp.com</email>
+    <companyName>BadCorp</companyName>
+    <position>MANAGER</position>
+    <salary>-5000</salary>
+  </employee>
+
+  <employee>
+    <firstName>Piotr</firstName>
+    <lastName>Dup</lastName>
+    <email>piotr.zielinski@innovatech.com</email>
+    <companyName>InnovaTech</companyName>
+    <position>PROGRAMISTA</position>
+    <salary>9000</salary>
+  </employee>
+
+  <employee>
+    <lastName>Brak</lastName>
+    <email>brak.danych@fail.com</email>
+    <companyName>TechCorp</companyName>
+    <position>STAZYSTA</position>
+    <salary>3000</salary>
+  </employee>
+
+  <employee>
+    <firstName>Zero</firstName>
+    <lastName>Pay</lastName>
+    <email>zero.pay@nowhere.com</email>
+    <companyName>NoCorp</companyName>
+    <position>PROGRAMISTA</position>
+    <salary>0</salary>
+  </employee>
+
+  <employee>
+    <firstName>Diac</firstName>
+    <lastName>Critic</lastName>
+    <email>diac.critic@nowhere.com</email>
+    <companyName>NoCorp</companyName>
+    <position>Stażysta</position>
+    <salary>3200</salary>
+  </employee>
+</employees>

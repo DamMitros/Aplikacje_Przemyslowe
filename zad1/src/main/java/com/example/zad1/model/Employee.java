@@ -9,6 +9,7 @@ public class Employee {
     private Position position;
     private int salary;
     private EmploymentStatus status = EmploymentStatus.ACTIVE;
+    private String photoFileName;
 
     public Employee(String fullName, String email, String companyName, Position position, int salary) {
         this.fullName = fullName;
@@ -48,6 +49,9 @@ public class Employee {
     public EmploymentStatus getStatus() {
         return status;
     }
+    public String getPhotoFileName() {
+        return photoFileName;
+    }
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
@@ -66,6 +70,9 @@ public class Employee {
     }
     public void setStatus(EmploymentStatus status) {
         this.status = status;
+    }
+    public void setPhotoFileName(String photoFileName) {
+        this.photoFileName = photoFileName;
     }
 
     @Override
