@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::content})}">
+<head>
+    <title th:text="${department.id == null ? 'Dodaj Departament' : 'Edytuj Departament'}">Formularz Departamentu</title>
+</head>
+<body>
+<section th:fragment="content">
+    <h2 th:text="${department.id == null ? 'Dodaj Nowy Departament' : 'Edytuj Departament'}"></h2>
+
+    <form th:action="${department.id == null} ? @{/departments/add} : @{/departments/edit/{id}(id=${department.id})}"
+          th:object="${department}" method="post" class="form-container">
+
+        <div class="form-group">
+            <label for="name">Nazwa:</label>
+            <input type="text" id="name" th:field="*{name}" />
+            <span class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="companyName">Firma:</label>
+            <input type="text" id="companyName" th:field="*{companyName}" />
+            <span class="error" th:if="${#fields.hasErrors('companyName')}" th:errors="*{companyName}"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="location">Lokalizacja:</label>
+            <input type="text" id="location" th:field="*{location}" />
+            <span class="error" th:if="${#fields.hasErrors('location')}" th:errors="*{location}"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="budget">Budżet:</label>
+            <input type="number" step="0.01" id="budget" th:field="*{budget}" />
+            <span class="error" th:if="${#fields.hasErrors('budget')}" th:errors="*{budget}"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="managerEmail">Manager:</label>
+            <select id="managerEmail" th:field="*{managerEmail}">
+                <option value="">-- Brak managera --</option>
+                <option th:each="manager : ${managers}"
+                        th:value="${manager.email}"
+                        th:text="${manager.fullName + ' (' + manager.position + ')'}"
+                        th:selected="${manager.email == department.managerEmail}"></option>
+            </select>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn" th:text="${department.id == null ? 'Zapisz' : 'Zaktualizuj'}">Zapisz</button>
+            <a th:href="@{/departments}" class="btn btn-secondary">Anuluj</a>
+        </div>
+    </form>
+</section>
+</body>
+</html>

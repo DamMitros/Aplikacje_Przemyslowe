@@ -55,6 +55,16 @@ class StatisticsControllerTest {
     }
 
     @Test
+    @DisplayName("GET /api/statistics/salary/average?company=null -> 200 and global average salary")
+    void averageSalary_companyNull() throws Exception {
+        Mockito.when(employeeService.getAverageSalary()).thenReturn(12345.67);
+
+        mockMvc.perform(get("/api/statistics/salary/average").param("company", ""))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.averageSalary", is(12345.67)));
+    }
+
+    @Test
     @DisplayName("GET /api/statistics/company/{companyName} -> 200 and company statistics")
     void companyStats_success() throws Exception {
         CompanyStatistics cs = new CompanyStatistics(2, 19250.0, "Jan Kowalski", 27000);
@@ -86,6 +96,7 @@ class StatisticsControllerTest {
     @DisplayName("GET /api/statistics/positions -> 200 and positions distribution")
     void positions_distribution() throws Exception {
         Map<Position, Integer> counts = new LinkedHashMap<>();
+        counts.put(null,1);
         counts.put(Position.MANAGER, 3);
         counts.put(Position.PROGRAMISTA, 5);
         Mockito.when(employeeService.countByPosition()).thenReturn(counts);
@@ -103,6 +114,7 @@ class StatisticsControllerTest {
         counts.put(EmploymentStatus.ACTIVE, 4);
         counts.put(EmploymentStatus.ON_LEAVE, 1);
         counts.put(EmploymentStatus.TERMINATED, 2);
+        counts.put(null, 3);
         Mockito.when(employeeService.countByStatus()).thenReturn(counts);
 
         mockMvc.perform(get("/api/statistics/status"))

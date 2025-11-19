@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::content})}">
+<head>
+    <title th:text="|Statystyki firmy: ${companyName}|">Statystyki Firmy</title>
+</head>
+<body>
+    <section th:fragment="content">
+        <h2 th:text="|Statystyki firmy: ${companyName}|">Statystyki Firmy</h2>
+
+        <div class="details-box">
+            <p><strong>Liczba pracowników:</strong> <span th:text="${stats.employeeCount}"></span></p>
+            <p><strong>Średnia pensja:</strong> <span th:text="${#numbers.formatDecimal(stats.averageSalary,1,'DEFAULT',2,'DEFAULT')}"></span></p>
+            <p><strong>Najwyższa pensja:</strong> <span th:text="${stats.highestSalary}"></span></p>
+            <p><strong>Najlepiej zarabiający:</strong> <span th:text="${stats.topEarnerFullName}"></span></p>
+        </div>
+
+        <h3>Pracownicy</h3>
+        <table th:if="${not #lists.isEmpty(employees)}">
+            <thead>
+            <tr>
+                <th>Imię i Nazwisko</th>
+                <th>Email</th>
+                <th>Stanowisko</th>
+                <th>Pensja</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="e : ${employees}">
+                <td th:text="${e.fullName}"></td>
+                <td th:text="${e.email}"></td>
+                <td th:text="${e.position}"></td>
+                <td th:text="${e.salary}"></td>
+                <td th:text="${e.status}"></td>
+            </tr>
+            </tbody>
+        </table>
+        <div th:if="${#lists.isEmpty(employees)}">
+            <p>Brak pracowników dla tej firmy.</p>
+        </div>
+
+        <div class="form-actions">
+            <a th:href="@{/statistics}" class="btn btn-secondary">Powrót do statystyk</a>
+        </div>
+    </section>
+</body>
+</html>

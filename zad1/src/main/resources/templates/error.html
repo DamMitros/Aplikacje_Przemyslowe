@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::content})}">
+<head>
+    <title>Błąd</title>
+</head>
+<body>
+<section th:fragment="content">
+    <h2>Wystąpił błąd</h2>
+    <p th:text="${message}">Nieznany błąd.</p>
+    <div class="form-actions">
+        <a th:href="@{/}" class="btn btn-secondary">Powrót na stronę główną</a>
+    </div>
+</section>
+</body>
+</html>
+

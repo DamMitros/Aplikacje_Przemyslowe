@@ -1,4 +1,31 @@
-# **System zarządzania pracownikami: CSV, API + Analizy**
+# **System zarządzania pracownikami: CSV, API + Analizy + UI (Thymeleaf)**
+
+### Główne adresy
+- `/` – strona główna
+- `/employees` – lista pracowników
+- `/employees/add` – formularz dodawania pracownika
+- `/employees/edit/{email}` – edycja pracownika
+- `/employees/search` – wyszukiwarka po firmie
+- `/employees/import` – import CSV/XML
+- `/departments` – lista departamentów
+- `/departments/add` – dodawanie departamentu
+- `/departments/edit/{id}` – edycja departamentu
+- `/departments/details/{id}` – szczegóły departamentu
+- `/departments/documents/{id}` – dokumenty departamentu (upload / pobieranie)
+- `/statistics` – dashboard statystyk
+- `/statistics/company/{name}` – statystyki wybranej firmy
+
+### Funkcje UI
+- Wspólny layout (`layout.html`) z nawigacją i komunikatami flash (sukces / błąd).
+- Walidacja formularzy, wyświetlanie błędów pod polami (Thymeleaf `th:errors`).
+- Upload plików z formularza HTML (enctype multipart). Obsługa dokumentów pracowników (REST) i departamentów (MVC).
+- Dynamiczne selecty dla enumów (Position, EmploymentStatus, DocumentType) oraz lista dostępnych departamentów przy dodawaniu/edycji pracownika.
+- Statystyki: ogólne, per firma, rozkład stanowisk.
+
+### Uruchomienie UI
+```bash
+./gradlew bootRun
+```
 
 ## Lista dostępnych endpointów (skrót)
 - Employees

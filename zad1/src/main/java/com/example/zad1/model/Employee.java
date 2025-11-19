@@ -1,15 +1,25 @@
 package com.example.zad1.model;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
 import java.util.Objects;
 
 public class Employee {
+    @NotEmpty(message="Imię i nazwisko jest wymagane")
     private String fullName;
+
+    @Email(message="Nieprawidłowy format adresu email")
+    @NotEmpty(message="Adres email jest wymagany")
     private String email;
     private String companyName;
     private Position position;
+
+    @Min(value = 0, message = "Wynagrodzenie nie może być ujemne")
     private int salary;
     private EmploymentStatus status = EmploymentStatus.ACTIVE;
     private String photoFileName;
+    private Long departmentId;
 
     public Employee(String fullName, String email, String companyName, Position position, int salary) {
         this.fullName = fullName;
@@ -18,6 +28,8 @@ public class Employee {
         this.position = position;
         this.salary = salary;
     }
+
+    public Employee() {}
 
     public String getFullName() {
         return fullName;
@@ -52,6 +64,9 @@ public class Employee {
     public String getPhotoFileName() {
         return photoFileName;
     }
+    public Long getDepartmentId() {
+        return departmentId;
+    }
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
@@ -73,6 +88,9 @@ public class Employee {
     }
     public void setPhotoFileName(String photoFileName) {
         this.photoFileName = photoFileName;
+    }
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
     }
 
     @Override

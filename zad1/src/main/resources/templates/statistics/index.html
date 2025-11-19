@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::content})}">
+<head>
+    <title>Statystyki</title>
+</head>
+<body>
+<section th:fragment="content">
+    <h2>Dashboard Statystyk</h2>
+
+    <h3>Statystyki Ogólne</h3>
+    <div class="stats-grid">
+        <div class="stat-box">
+            <h4>Łączna liczba pracowników</h4>
+            <p th:text="${totalEmployees}">0</p>
+        </div>
+        <div class="stat-box">
+            <h4>Średnie wynagrodzenie</h4>
+            <p th:text="${#numbers.formatDecimal(averageSalary, 1, 'DEFAULT', 2, 'DEFAULT')}">0.00</p>
+        </div>
+        <div class="stat-box">
+            <h4>Liczba departamentów</h4>
+            <p th:text="${totalDepartments}">0</p>
+        </div>
+    </div>
+
+    <h3>Statystyki każdej firmy osobno</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>Firma</th>
+            <th>Liczba pracowników</th>
+            <th>Średnia pensja</th>
+            <th>Najwyższa pensja</th>
+            <th>Najlepiej zarabiający</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="entry : ${companyStats}">
+            <td>
+                <a th:href="@{/statistics/company/{name}(name=${entry.key})}"
+                   th:text="${entry.key}">TechCorp</a>
+            </td>
+            <td th:text="${entry.value.employeeCount}"></td>
+            <td th:text="${#numbers.formatDecimal(entry.value.averageSalary, 1, 'DEFAULT', 2, 'DEFAULT')}"></td>
+            <td th:text="${entry.value.highestSalary}"></td>
+            <td th:text="${entry.value.topEarnerFullName}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h3>Rozkład pracowników po stanowiskach</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>Stanowisko</th>
+            <th>Liczba pracowników</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="entry : ${positionCounts}">
+            <td th:text="${entry.key}">MANAGER</td>
+            <td th:text="${entry.value}">0</td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+</body>
+</html>

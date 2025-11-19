@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::content})}">
+<head>
+    <title>Lista Pracowników</title>
+</head>
+<body>
+<section th:fragment="content">
+    <h2>Lista Pracowników</h2>
+    <div class="actions-bar">
+        <a th:href="@{/employees/add}" class="btn">Dodaj nowego pracownika</a>
+        <a th:href="@{/employees/search}" class="btn">Wyszukaj po firmie</a>
+        <a th:href="@{/employees/import}" class="btn btn-secondary">Importuj CSV/XML</a>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Imię i Nazwisko</th>
+            <th>Email</th>
+            <th>Firma</th>
+            <th>Stanowisko</th>
+            <th>Pensja</th>
+            <th>Status</th>
+            <th>Akcje</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="employee : ${employees}">
+            <td th:text="${employee.fullName}">Jan Kowalski</td>
+            <td th:text="${employee.email}">jan@example.com</td>
+            <td th:text="${employee.companyName}">TechCorp</td>
+            <td th:text="${employee.position}">MANAGER</td>
+            <td th:text="${employee.salary}">12000</td>
+            <td th:text="${employee.status}">ACTIVE</td>
+            <td>
+                <a th:href="@{/employees/edit/{email}(email=${employee.email})}" class="btn-sm">Edytuj</a>
+                <a th:href="@{/employees/delete/{email}(email=${employee.email})}" class="btn-sm btn-danger"
+                   onclick="return confirm('Czy na pewno chcesz usunąć tego pracownika?');">Usuń</a>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(employees)}">
+            <td colspan="7">Brak pracowników w systemie.</td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+</body>
+</html>

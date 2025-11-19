@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::content})}">
+<head>
+    <title>Wyniki Wyszukiwania</title>
+</head>
+<body>
+<section th:fragment="content">
+    <h2>Wyniki wyszukiwania dla firmy: "<span th:text="${companyQuery}"></span>"</h2>
+
+    <div th:if="${#lists.isEmpty(results)}">
+        <p>Nie znaleziono pracowników dla tej firmy.</p>
+    </div>
+
+    <table th:if="${not #lists.isEmpty(results)}">
+        <thead>
+        <tr>
+            <th>Imię i Nazwisko</th>
+            <th>Email</th>
+            <th>Stanowisko</th>
+            <th>Pensja</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="employee : ${results}">
+            <td th:text="${employee.fullName}">Jan Kowalski</td>
+            <td th:text="${employee.email}">jan@example.com</td>
+            <td th:text="${employee.position}">MANAGER</td>
+            <td th:text="${employee.salary}">12000</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="form-actions">
+        <a th:href="@{/employees/search}" class="btn btn-secondary">Nowe wyszukiwanie</a>
+    </div>
+</section>
+</body>
+</html>

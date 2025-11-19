@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content)">
+<head>
+    <meta charset="UTF-8">
+    <title>System Zarządzania Pracownikami</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a th:href="@{/}">Strona Główna</a></li>
+                <li><a th:href="@{/employees}">Pracownicy</a></li>
+                <li><a th:href="@{/departments}">Departamenty</a></li>
+                <li><a th:href="@{/statistics}">Statystyki</a></li>
+                <li><a th:href="@{/employees/import}">Pliki</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div th:if="${message}" class="alert-success">
+            <p th:text="${message}"></p>
+        </div>
+        <div th:if="${errorMessage}" class="alert-error">
+            <p th:text="${errorMessage}"></p>
+        </div>
+
+        <th:block th:replace="${content}"></th:block>
+
+    </main>
+</body>
+</html>

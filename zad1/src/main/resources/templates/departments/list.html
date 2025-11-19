@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::content})}">
+<head>
+    <title>Lista Departamentów</title>
+</head>
+<body>
+<section th:fragment="content">
+    <h2>Lista Departamentów</h2>
+    <div class="actions-bar">
+        <a th:href="@{/departments/add}" class="btn">Dodaj nowy departament</a>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Nazwa</th>
+            <th>Lokalizacja</th>
+            <th>Budżet</th>
+            <th>Manager</th>
+            <th>Akcje</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="dept : ${departments}">
+            <td th:text="${dept.name}">IT</td>
+            <td th:text="${dept.location}">Warszawa</td>
+            <td th:text="${#numbers.formatDecimal(dept.budget, 1, 'DEFAULT', 2, 'DEFAULT')}">500000</td>
+            <td th:text="${dept.managerEmail != null ? employeeNames[dept.managerEmail] : 'Nieprzypisany'}">
+                Jan Kowalski
+            </td>
+            <td>
+                <a th:href="@{/departments/details/{id}(id=${dept.id})}" class="btn-sm">Detale</a>
+                <a th:href="@{/departments/edit/{id}(id=${dept.id})}" class="btn-sm">Edytuj</a>
+                <a th:href="@{/departments/documents/{id}(id=${dept.id})}" class="btn-sm">Dokumenty</a>
+                <a th:href="@{/departments/delete/{id}(id=${dept.id})}" class="btn-sm btn-danger"
+                   onclick="return confirm('Czy na pewno chcesz usunąć ten departament?');">Usuń</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+</body>
+</html>

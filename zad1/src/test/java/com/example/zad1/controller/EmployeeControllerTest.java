@@ -265,6 +265,161 @@ public class EmployeeControllerTest {
                 .andExpect(jsonPath("$[1].status").value("ACTIVE"));
     }
 
+    @Test
+    @DisplayName("POST /api/employees - 400 when email missing")
+    void create_shouldReturn400WhenEmailMissing() throws Exception {
+        Map<String, Object> body = Map.of(
+                "firstName", "Jan",
+                "lastName", "Kowalski",
+                "email", "",
+                "company", "TechCorp",
+                "position", "PREZES",
+                "salary", 10000,
+                "status", "ACTIVE"
+        );
+
+        mockMvc.perform(post("/api/employees")
+                        .contentType("application/json")
+                        .content(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(body)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+    }
+
+    @Test
+    @DisplayName("POST /api/employees - 400 when position invalid")
+    void create_shouldReturn400WhenPositionInvalid() throws Exception {
+        Map<String, Object> body = Map.of(
+                "firstName", "Jan",
+                "lastName", "Kowalski",
+                "email", "jan@example.com",
+                "company", "TechCorp",
+                "position", "BAD_POS",
+                "salary", 10000,
+                "status", "ACTIVE"
+        );
+
+        when(employeeService.GetEmployeeByEmail("jan@example.com")).thenReturn(Optional.empty());
+
+        mockMvc.perform(post("/api/employees")
+                        .contentType("application/json")
+                        .content(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(body)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+    }
+
+    @Test
+    @DisplayName("PUT /api/employees/{email} - 400 when body is null")
+    void update_shouldReturn400WhenBodyNull() throws Exception {
+        mockMvc.perform(put("/api/employees/{email}", "jan@example.com")
+                        .contentType("application/json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+    }
+
+    @Test
+    @DisplayName("PUT /api/employees/{email} - 404 when employee not found")
+    void update_nonExistingEmployee_shouldReturn404() throws Exception {
+        when(employeeService.GetEmployeeByEmail("missing@example.com")).thenReturn(Optional.empty());
+
+        Map<String, Object> body = Map.of(
+                "email", "missing@example.com",
+                "firstName", "X",
+                "lastName", "Y"
+        );
+
+        mockMvc.perform(put("/api/employees/{email}", "missing@example.com")
+                        .contentType("application/json")
+                        .content(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(body)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
+    @DisplayName("PUT /api/employees/{email} - 400 when position invalid")
+    void update_shouldReturn400WhenPositionInvalid() throws Exception {
+        when(employeeService.GetEmployeeByEmail("steczkowska1764@gmail.com")).thenReturn(Optional.of(emp1));
+
+        Map<String, Object> body = Map.of(
+                "email", "steczkowska1764@gmail.com",
+                "firstName", "Justyna",
+                "lastName", "Steczkowska",
+                "company", "TechCorp",
+                "position", "BAD_POS",
+                "salary", 15000,
+                "status", "ACTIVE"
+        );
+
+        mockMvc.perform(put("/api/employees/{email}", "steczkowska1764@gmail.com")
+                        .contentType("application/json")
+                        .content(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(body)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/employees/{email}/status - 404 when employee not found")
+    void patchStatus_nonExistingEmployee_shouldReturn404() throws Exception {
+        when(employeeService.updateStatusByEmail("missing@example.com", EmploymentStatus.TERMINATED)).thenReturn(Optional.empty());
+
+        String body = "{\"status\":\"TERMINATED\"}";
+
+        mockMvc.perform(patch("/api/employees/{email}/status", "missing@example.com")
+                        .contentType("application/json")
+                        .content(body))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
+    @DisplayName("GET /api/employees/status/{status} - 400 when invalid status")
+    void getByStatus_invalidStatus_shouldReturn400() throws Exception {
+        mockMvc.perform(get("/api/employees/status/{status}", "WRONG"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+    }
+
+    @Test
+    @DisplayName("GET /api/employees?company= (blank) - 200 and returns all employees")
+    void getAll_blankCompany_shouldReturnAll() throws Exception {
+        when(employeeService.getAllEmployees()).thenReturn(List.of(emp1, emp2));
+
+        mockMvc.perform(get("/api/employees").param("company", "  "))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].email").value("steczkowska1764@gmail.com"))
+                .andExpect(jsonPath("$[1].email").value("edyth@gmail.com"));
+    }
+
+    @Test
+    @DisplayName("POST /api/employees - 400 when body missing")
+    void create_missingBody_shouldReturn400() throws Exception {
+        mockMvc.perform(post("/api/employees").contentType("application/json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+    }
+
+    @Test
+    @DisplayName("POST /api/employees - 400 when addEmployee returns false (invalid data)")
+    void create_shouldReturn400WhenAddReturnsFalse() throws Exception {
+        String email = "new@example.com";
+        Map<String, Object> body = Map.of(
+                "firstName", "New",
+                "lastName", "User",
+                "email", email,
+                "company", "TechCorp",
+                "position", "PREZES",
+                "salary", 0,
+                "status", "ACTIVE"
+        );
+        when(employeeService.GetEmployeeByEmail(email)).thenReturn(Optional.empty());
+        when(employeeService.addEmployee(Mockito.any(Employee.class))).thenReturn(false);
+
+        mockMvc.perform(post("/api/employees")
+                        .contentType("application/json")
+                        .content(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(body)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+    }
+
     @TestConfiguration
     static class TestConfig {
         @Bean

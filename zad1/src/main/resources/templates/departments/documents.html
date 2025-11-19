@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::content})}">
+<head>
+    <title>Dokumenty Departamentu</title>
+</head>
+<body>
+<section th:fragment="content">
+    <h2 th:text="|Dokumenty departamentu: ${department.name}|">Dokumenty Departamentu</h2>
+
+    <div class="form-container">
+        <h3>Dodaj dokument</h3>
+        <form th:action="@{/departments/documents/{id}(id=${department.id})}" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="file">Plik:</label>
+                <input type="file" id="file" name="file" required accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.txt" />
+            </div>
+            <div class="form-group">
+                <label for="type">Typ:</label>
+                <select id="type" name="type" required>
+                    <option th:each="t : ${documentTypes}" th:value="${t}" th:text="${t}"></option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn">Wyślij</button>
+                <a th:href="@{/departments}" class="btn btn-secondary">Powrót</a>
+            </div>
+        </form>
+    </div>
+
+    <h3>Lista dokumentów</h3>
+    <div th:if="${#lists.isEmpty(documents)}">
+        <p>Brak dokumentów dla tego departamentu.</p>
+    </div>
+    <table th:if="${not #lists.isEmpty(documents)}">
+        <thead>
+        <tr>
+            <th>Nazwa oryginalna</th>
+            <th>Typ</th>
+            <th>Data uploadu</th>
+            <th>Akcje</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="doc : ${documents}">
+            <td th:text="${doc.originalFileName}">plik.pdf</td>
+            <td th:text="${doc.fileType}">CONTRACT</td>
+            <td th:text="${#temporals.format(doc.uploadDate,'yyyy-MM-dd HH:mm')}">2025-01-01</td>
+            <td>
+                <a th:href="@{/departments/documents/{id}/download/{docId}(id=${department.id},docId=${doc.id})}" class="btn-sm">Pobierz</a>
+                <a th:href="@{/departments/documents/{id}/delete/{docId}(id=${department.id},docId=${doc.id})}" class="btn-sm btn-danger" onclick="return confirm('Usunąć dokument?');">Usuń</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+</body>
+</html>

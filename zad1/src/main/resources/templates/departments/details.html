@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::content})}">
+<head>
+    <title>Szczegóły Departamentu</title>
+</head>
+<body>
+<section th:fragment="content">
+    <h2 th:text="|Szczegóły: ${department.name}|">Szczegóły Departamentu</h2>
+
+    <div class="details-box">
+        <p><strong>Nazwa:</strong> <span th:text="${department.name}"></span></p>
+        <p><strong>Lokalizacja:</strong> <span th:text="${department.location}"></span></p>
+        <p><strong>Budżet:</strong> <span th:text="${#numbers.formatDecimal(department.budget, 1, 'DEFAULT', 2, 'DEFAULT')}"></span></p>
+        <p><strong>Manager:</strong> <span th:text="${managerName}"></span></p>
+    </div>
+
+    <h3>Pracownicy w tym departamencie</h3>
+    <div th:if="${#lists.isEmpty(employeesInDept)}">
+        <p>Brak pracowników przypisanych do tego departamentu.</p>
+    </div>
+
+    <table th:if="${not #lists.isEmpty(employeesInDept)}">
+        <thead>
+        <tr>
+            <th>Imię i Nazwisko</th>
+            <th>Email</th>
+            <th>Stanowisko</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="employee : ${employeesInDept}">
+            <td th:text="${employee.fullName}">Jan Kowalski</td>
+            <td th:text="${employee.email}">jan@example.com</td>
+            <td th:text="${employee.position}">MANAGER</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="form-actions">
+        <a th:href="@{/departments}" class="btn btn-secondary">Wróć do listy</a>
+    </div>
+</section>
+</body>
+</html>

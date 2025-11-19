@@ -1,0 +1,12 @@
+firstName,lastName,email,company,position,salary
+Jan,Kowalski,jan.kowalski@techcorp.com,TechCorp,Prezes,27000
+Anna,Nowak,anna.nowak@techcorp.com,TechCorp,Manager,11500
+Piotr,Nowicki,piotr.nowicki@techcorp.com,TechCorp,PROGRAMISTA,14000
+Ewa,Malinowska,ewa.malinowska@techcorp.com,TechCorp,PROGRAMISTA,9500
+Tomasz,Lewandowski,tomasz.lewandowski@techcorp.com,TechCorp,PROGRAMISTA,9000
+Magda,Zając,magda.zajac@techcorp.com,TechCorp,WICEPREZES,8500
+Robert,Król,robert.krol@techcorp.com,TechCorp,MANAGER,12000
+Joanna,Kaczmarek,joanna.kaczmarek@techcorp.com,TechCorp,HR WICEPREZES,8000
+Karol,Wiśniewski,karol.wisniewski@techcorp.com,TechCorp,MANAGER,11000
+Agnieszka,Duda,agnieszka.duda@techcorp.com,TechCorp,STAZYSTA,9000
+

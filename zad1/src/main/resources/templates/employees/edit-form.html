@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::content})}">
+<head>
+    <title>Edytuj Pracownika</title>
+</head>
+<body>
+<section th:fragment="content">
+    <h2>Edytuj Pracownika</h2>
+
+    <form th:action="@{/employees/edit}" th:object="${employee}" method="post" class="form-container">
+
+        <input type="hidden" th:field="*{email}" />
+
+        <div class="form-group">
+            <label for="fullName">Imię i Nazwisko:</label>
+            <input type="text" id="fullName" th:field="*{fullName}" />
+            <span class="error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></span>
+        </div>
+
+        <div class="form-group">
+            <label>Email (nie można zmienić):</label>
+            <input type="email" th:field="*{email}" readonly="readonly" class="readonly-field" />
+        </div>
+
+        <div class="form-group">
+            <label for="companyName">Firma:</label>
+            <input type="text" id="companyName" th:field="*{companyName}" />
+        </div>
+
+        <div class="form-group">
+            <label for="position">Stanowisko:</label>
+            <select id="position" th:field="*{position}">
+                <option value="">-- Wybierz --</option>
+                <option th:each="pos : ${positions}" th:value="${pos}" th:text="${pos}"
+                        th:selected="${pos == employee.position}"></option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="salary">Pensja:</label>
+            <input type="number" id="salary" th:field="*{salary}" />
+            <span class="error" th:if="${#fields.hasErrors('salary')}" th:errors="*{salary}"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="status">Status Zatrudnienia:</label>
+            <select id="status" th:field="*{status}">
+                <option th:each="stat : ${statuses}" th:value="${stat}" th:text="${stat}"
+                        th:selected="${stat == employee.status}"></option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="departmentId">Departament:</label>
+            <select id="departmentId" th:field="*{departmentId}">
+                <option value="">-- Brak przypisania --</option>
+                <option th:each="d : ${departments}" th:value="${d.id}" th:text="${d.name}"
+                        th:selected="${d.id == employee.departmentId}"></option>
+            </select>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn">Zaktualizuj</button>
+            <a th:href="@{/employees}" class="btn btn-secondary">Anuluj</a>
+        </div>
+    </form>
+</section>
+</body>
+</html>
