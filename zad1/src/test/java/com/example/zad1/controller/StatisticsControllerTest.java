@@ -67,7 +67,7 @@ class StatisticsControllerTest {
     @Test
     @DisplayName("GET /api/statistics/company/{companyName} -> 200 and company statistics")
     void companyStats_success() throws Exception {
-        CompanyStatistics cs = new CompanyStatistics(2, 19250.0, "Jan Kowalski", 27000);
+        CompanyStatistics cs = new CompanyStatistics("TechCorp", 2, 19250.0, "Jan Kowalski", 27000);
         Map<String, CompanyStatistics> map = Map.of("TechCorp", cs);
         Mockito.when(employeeService.getCompanyStatistics()).thenReturn(map);
 

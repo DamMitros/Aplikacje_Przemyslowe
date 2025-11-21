@@ -142,7 +142,7 @@ public class ReportGeneratorServiceTest {
     @Test
     void generateCompanyStatisticsPdf_caseInsensitiveStats_writesValidPdf() throws Exception {
         String company = "Alpha";
-        CompanyStatistics stats = new CompanyStatistics(2, 10000.0, "Top Earner", 12000);
+        CompanyStatistics stats = new CompanyStatistics( company, 2, 10000.0, "Top Earner", 12000);
 
         when(employeeService.getCompanyStatistics()).thenReturn(Map.of("alpha", stats));
 
@@ -170,7 +170,7 @@ public class ReportGeneratorServiceTest {
 
     @Test
     void generateCompanyStatisticsPdf_whenEnsureDirFails_wrapsAsFileStorageException() throws IOException {
-        when(employeeService.getCompanyStatistics()).thenReturn(Map.of("Firm", new CompanyStatistics(1, 10.0, "A A", 10)));
+        when(employeeService.getCompanyStatistics()).thenReturn(Map.of("Firm", new CompanyStatistics("Firm",1, 10.0, "A A", 10)));
         when(employeeService.getEmployeeByCompany("Firm")).thenReturn(List.of(new Employee("A A", "a@a", "Firm", Position.PROGRAMISTA, 10)));
 
         Path fileAsDir = Files.createTempFile("not-a-dir-", ".tmp");
@@ -205,7 +205,7 @@ public class ReportGeneratorServiceTest {
     @Test
     void generateCompanyStatisticsPdf_handlesNullEmployeeAndNullPosition() {
         String company = "Alpha";
-        CompanyStatistics stats = new CompanyStatistics(2, 10000.0, "Top Earner", 12000);
+        CompanyStatistics stats = new CompanyStatistics(company, 2, 10000.0, "Top Earner", 12000);
         when(employeeService.getCompanyStatistics()).thenReturn(Map.of("Alpha", stats));
 
         Employee e1 = new Employee("A A", "a@a", company, null, 3000);

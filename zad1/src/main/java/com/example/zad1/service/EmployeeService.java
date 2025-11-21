@@ -73,29 +73,14 @@ public class EmployeeService {
         return employeeDAO.delete(email);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Map<String, CompanyStatistics> getCompanyStatistics() {
         List<CompanyStatistics> statsList = employeeDAO.getCompanyStatistics();
-        Map<String, CompanyStatistics> statsMap = new HashMap<>();
 
-        return getAllEmployees().stream().filter(Objects::nonNull)
-                .filter(emp -> emp.getCompanyName() != null && !emp.getCompanyName().isBlank())
-                .collect(Collectors.groupingBy(
-                        Employee::getCompanyName,
-                        Collectors.collectingAndThen(Collectors.toList(), list -> {
-                            int count=list.size();
-                            double avg=list.stream().mapToInt(Employee::getSalary).average().orElse(0.0);
-                            Employee topEarner=list.stream()
-                                    .max(Comparator.comparingInt(Employee::getSalary))
-                                    .orElse(null);
-                            String topEarnerName=topEarner!=null ? topEarner.getFullName() : "";
-                            int highestSalary=0;
-                            if (topEarnerName != null) {
-                                assert topEarner != null;
-                                highestSalary = topEarner.getSalary();
-                            }
-                            return new CompanyStatistics(count, avg, topEarnerName, highestSalary);
-                        })
+        return statsList.stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        CompanyStatistics::getCompanyName,
+                        stat -> stat
                 ));
     }
 
@@ -180,69 +165,4 @@ public class EmployeeService {
     public void deleteAll() {
         employeeDAO.deleteAll();
     }
-//    private final Set<Employee> employees = new HashSet<>();
-//
-//    public boolean addEmployee(Employee employee) {
-//        if (employee==null || employee.getEmail()==null || employee.getEmail().isBlank())
-//            return false;
-//        return employees.add(employee);
-//    }
-//    public List<Employee> getAllEmployees() {
-//        return new ArrayList<>(employees);
-//    }
-
-//    public Optional<Employee> UpdateEmployeeByEmail(String email, Employee changes) {
-//        if (email == null || email.isBlank() || changes == null) return Optional.empty();
-//        Optional<Employee> empOpt = GetEmployeeByEmail(email);
-//        empOpt.ifPresent(emp -> {
-//            emp.setFullName(changes.getFullName());
-//            emp.setCompanyName(changes.getCompanyName());
-//            emp.setPosition(changes.getPosition());
-//            emp.setSalary(changes.getSalary());
-//            emp.setStatus(changes.getStatus());
-//        });
-//        return empOpt;
-//    }
-//    public Optional<Employee> updateStatusByEmail(String email, EmploymentStatus status){
-//        if (email==null || email.isBlank() || status==null) return Optional.empty();
-//        Optional<Employee> empOpt = GetEmployeeByEmail(email);
-//        empOpt.ifPresent(emp -> emp.setStatus(status));
-//        return empOpt;
-//    }
-//    public boolean deleteEmployeeByEmail(String email) {
-//        if (email==null || email.isBlank()) return false;
-//        return employees.removeIf(emp -> email.equalsIgnoreCase(emp.getEmail()));
-//    }
-//    public List<Employee> getEmployeeByCompany(String companyName){
-//        if (companyName==null || companyName.isBlank())
-//            return Collections.emptyList();
-//        return employees.stream()
-//                .filter(emp ->
-//                        emp.getCompanyName() != null &&
-//                        emp.getCompanyName().equalsIgnoreCase(companyName))
-//                .collect(Collectors.toList());
-//    }
-//    public Map<String, CompanyStatistics> getCompanyStatistics() {
-//        return employees.stream()
-//                .filter(Objects::nonNull)
-//                .filter(emp -> emp.getCompanyName() != null && !emp.getCompanyName().isBlank())
-//                .collect(Collectors.groupingBy(
-//                        Employee::getCompanyName,
-//                        Collectors.collectingAndThen(Collectors.toList(), list -> {
-//                            int count = list.size();
-//                            double avg = list.stream().mapToInt(Employee::getSalary).average().orElse(0.0);
-//                            Employee topEarner = list.stream()
-//                                    .max(Comparator.comparingInt(Employee::getSalary))
-//                                    .orElse(null);
-//                            String topEarnerName = topEarner != null ? topEarner.getFullName() : "";
-//                            int highestSalary = 0;
-//                            if (topEarnerName != null) {
-//                                assert topEarner != null;
-//                                highestSalary = topEarner.getSalary();
-//                            }
-//
-//                            return new CompanyStatistics(count, avg, topEarnerName, highestSalary);
-//                        })
-//                ));
-//    }
 }

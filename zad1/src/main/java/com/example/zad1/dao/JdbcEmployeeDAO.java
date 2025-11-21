@@ -114,9 +114,10 @@ public class JdbcEmployeeDAO implements EmployeeDAO {
                 "GROUP BY company_name";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> new CompanyStatistics(
+                rs.getString("company_name"),
                 rs.getInt("emp_count"),
                 rs.getDouble("avg_salary"),
-                "Zobacz szczegóły",
+                "Zobacz listę",
                 rs.getInt("max_salary")
         ));
     }

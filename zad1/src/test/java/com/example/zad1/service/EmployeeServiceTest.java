@@ -2,6 +2,7 @@ package com.example.zad1.service;
 
 import com.example.zad1.dao.EmployeeDAO;
 import com.example.zad1.exception.EmployeeNotFoundException;
+import com.example.zad1.model.CompanyStatistics;
 import com.example.zad1.model.Employee;
 import com.example.zad1.model.EmploymentStatus;
 import com.example.zad1.model.Position;
@@ -194,7 +195,9 @@ public class EmployeeServiceTest {
 
     @Test
     void testGetCompanyStatisticsWhenAddedEmployees() {
-        when(employeeDAO.findAll()).thenReturn(List.of(emp1,emp2));
+        CompanyStatistics stats = new CompanyStatistics("TechCorp", 2, 10500.0, "Justyna Steczkowska", 12500);
+        when(employeeDAO.getCompanyStatistics()).thenReturn(List.of(stats));
+
         assertAll(
                 ()-> assertEquals(1, employeeService.getCompanyStatistics().size()),
                 ()-> assertTrue(employeeService.getCompanyStatistics().containsKey("TechCorp"))

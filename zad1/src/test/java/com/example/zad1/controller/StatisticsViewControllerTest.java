@@ -43,7 +43,7 @@ class StatisticsViewControllerTest {
         when(employeeService.getAllEmployees()).thenReturn(List.of(new Employee("Test","t@test.com","Firma", Position.PROGRAMISTA, 5000)));
         when(employeeService.getAverageSalary()).thenReturn(5000.0);
         when(departmentService.getAllDepartments()).thenReturn(List.of());
-        when(employeeService.getCompanyStatistics()).thenReturn(Map.of("Firma", new CompanyStatistics(1,5000.0,"Test",5000)));
+        when(employeeService.getCompanyStatistics()).thenReturn(Map.of("Firma", new CompanyStatistics("TechCorp", 1,5000.0,"Test",5000)));
         when(employeeService.countByPosition()).thenReturn(Map.of(Position.PROGRAMISTA,1));
 
         mockMvc.perform(get("/statistics"))
@@ -54,7 +54,7 @@ class StatisticsViewControllerTest {
 
     @Test
     void companyStatistics_shouldReturnCompanyView() throws Exception {
-        when(employeeService.getCompanyStatistics()).thenReturn(Map.of("Firma", new CompanyStatistics(1,5000.0,"Test",5000)));
+        when(employeeService.getCompanyStatistics()).thenReturn(Map.of("Firma", new CompanyStatistics("StrawberryPie", 1,5000.0,"Test",5000)));
         when(employeeService.getEmployeeByCompany("Firma")).thenReturn(List.of(new Employee("Test","t@test.com","Firma", Position.PROGRAMISTA, 5000)));
 
         mockMvc.perform(get("/statistics/company/Firma"))

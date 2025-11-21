@@ -1,48 +1,48 @@
 package com.example.zad1.service;
 
+import com.example.zad1.dao.DepartmentDAO;
 import com.example.zad1.model.Department;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class DepartmentService {
-    private final Map<Long, Department> departments = new ConcurrentHashMap<>();
-    private final AtomicLong idCounter = new AtomicLong();
+    private final DepartmentDAO departmentDAO;
 
-    public DepartmentService() {}
-
-    public Collection<Department> getAllDepartments() {
-        return departments.values();
+    public DepartmentService(DepartmentDAO departmentDAO) {
+        this.departmentDAO = departmentDAO;
     }
 
-    public Optional<Department> getDepartmentById(Long id) {
-        return Optional.ofNullable(departments.get(id));
+    public Collection<Department> getAllDepartments(){
+        return departmentDAO.findAll();
     }
 
+    public Optional<Department> getDepartmentById(Long id){
+        return departmentDAO.findById(id);
+    }
+
+    @Transactional
     public Department addDepartment(Department department) {
-        Long id = idCounter.incrementAndGet();
-        department.setId(id);
-        departments.put(id, department);
-        return department;
+        return departmentDAO.save(department);
     }
 
+    @Transactional
     public Optional<Department> updateDepartment(Long id, Department changes) {
-        return getDepartmentById(id).map(existing -> {
+        return departmentDAO.findById(id).map(existing -> {
             existing.setName(changes.getName());
             existing.setLocation(changes.getLocation());
             existing.setBudget(changes.getBudget());
             existing.setManagerEmail(changes.getManagerEmail());
-            departments.put(id, existing);
+            departmentDAO.save(existing);
             return existing;
         });
     }
 
+    @Transactional
     public boolean deleteDepartment(Long id) {
-        return departments.remove(id) != null;
+        return departmentDAO.delete(id);
     }
 }
