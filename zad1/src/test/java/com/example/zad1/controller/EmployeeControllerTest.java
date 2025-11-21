@@ -98,7 +98,7 @@ public class EmployeeControllerTest {
     @Test
     @DisplayName("GET /api/employees/{email} - 200 and return employee by email")
     void getByEmail_existingEmail_shouldReturn200AndEmployee() throws Exception {
-        when(employeeService.GetEmployeeByEmail("steczkowska1764@gmail.com")).thenReturn(Optional.of(emp1));
+        when(employeeService.getEmployeeByEmail("steczkowska1764@gmail.com")).thenReturn(Optional.of(emp1));
 
         mockMvc.perform(get("/api/employees/{email}", "steczkowska1764@gmail.com"))
                 .andExpect(status().isOk())
@@ -113,7 +113,7 @@ public class EmployeeControllerTest {
     @Test
     @DisplayName("GET /api/employees/{email} - 404 when employee not found")
     void getByEmail_nonExistingEmail_shouldReturn404() throws Exception {
-        when(employeeService.GetEmployeeByEmail("nonExistent")).thenReturn(Optional.empty());
+        when(employeeService.getEmployeeByEmail("nonExistent")).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/employees/{email}", "nonExistent"))
                 .andExpect(status().isNotFound())
@@ -135,7 +135,7 @@ public class EmployeeControllerTest {
                 "status", "ACTIVE"
         );
 
-        when(employeeService.GetEmployeeByEmail(email)).thenReturn(Optional.empty());
+        when(employeeService.getEmployeeByEmail(email)).thenReturn(Optional.empty());
         when(employeeService.addEmployee(Mockito.any(Employee.class))).thenReturn(true);
 
         mockMvc.perform(post("/api/employees")
@@ -150,7 +150,7 @@ public class EmployeeControllerTest {
     @Test
     @DisplayName("POST /api/employees - 409 Conflict when duplicate email")
     void create_shouldReturn409WhenDuplicate() throws Exception {
-        when(employeeService.GetEmployeeByEmail("edyth@gmail.com")).thenReturn(Optional.of(emp2));
+        when(employeeService.getEmployeeByEmail("edyth@gmail.com")).thenReturn(Optional.of(emp2));
 
         Map<String, Object> body = Map.of(
                 "firstName", "Edyta",
@@ -174,7 +174,7 @@ public class EmployeeControllerTest {
     void update_existingEmployee_shouldReturn200() throws Exception {
         var updated = makeEmployee("Justyna Steczkowska", "steczkowska1764@gmail.com", "TechCorp", Position.WICEPREZES, 17000, EmploymentStatus.ON_LEAVE);
 
-        when(employeeService.GetEmployeeByEmail("steczkowska1764@gmail.com")).thenReturn(Optional.of(emp1));
+        when(employeeService.getEmployeeByEmail("steczkowska1764@gmail.com")).thenReturn(Optional.of(emp1));
         when(employeeService.UpdateEmployeeByEmail(Mockito.eq("steczkowska1764@gmail.com"), Mockito.any(Employee.class)))
                 .thenReturn(Optional.of(updated));
 
@@ -298,7 +298,7 @@ public class EmployeeControllerTest {
                 "status", "ACTIVE"
         );
 
-        when(employeeService.GetEmployeeByEmail("jan@example.com")).thenReturn(Optional.empty());
+        when(employeeService.getEmployeeByEmail("jan@example.com")).thenReturn(Optional.empty());
 
         mockMvc.perform(post("/api/employees")
                         .contentType("application/json")
@@ -319,7 +319,7 @@ public class EmployeeControllerTest {
     @Test
     @DisplayName("PUT /api/employees/{email} - 404 when employee not found")
     void update_nonExistingEmployee_shouldReturn404() throws Exception {
-        when(employeeService.GetEmployeeByEmail("missing@example.com")).thenReturn(Optional.empty());
+        when(employeeService.getEmployeeByEmail("missing@example.com")).thenReturn(Optional.empty());
 
         Map<String, Object> body = Map.of(
                 "email", "missing@example.com",
@@ -337,7 +337,7 @@ public class EmployeeControllerTest {
     @Test
     @DisplayName("PUT /api/employees/{email} - 400 when position invalid")
     void update_shouldReturn400WhenPositionInvalid() throws Exception {
-        when(employeeService.GetEmployeeByEmail("steczkowska1764@gmail.com")).thenReturn(Optional.of(emp1));
+        when(employeeService.getEmployeeByEmail("steczkowska1764@gmail.com")).thenReturn(Optional.of(emp1));
 
         Map<String, Object> body = Map.of(
                 "email", "steczkowska1764@gmail.com",
@@ -410,7 +410,7 @@ public class EmployeeControllerTest {
                 "salary", 0,
                 "status", "ACTIVE"
         );
-        when(employeeService.GetEmployeeByEmail(email)).thenReturn(Optional.empty());
+        when(employeeService.getEmployeeByEmail(email)).thenReturn(Optional.empty());
         when(employeeService.addEmployee(Mockito.any(Employee.class))).thenReturn(false);
 
         mockMvc.perform(post("/api/employees")

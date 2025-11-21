@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotEmpty;
 import java.util.Objects;
 
 public class Employee {
+    private Long id;
     @NotEmpty(message="Imię i nazwisko jest wymagane")
     private String fullName;
 
@@ -31,6 +32,12 @@ public class Employee {
 
     public Employee() {}
 
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
     public String getFullName() {
         return fullName;
     }

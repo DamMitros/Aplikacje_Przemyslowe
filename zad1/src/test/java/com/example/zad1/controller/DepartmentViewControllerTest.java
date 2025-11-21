@@ -165,7 +165,7 @@ class DepartmentViewControllerTest {
 
         when(departmentService.getDepartmentById(1L)).thenReturn(Optional.of(testDept));
         when(employeeService.getAllEmployees()).thenReturn(List.of(manager, worker));
-        when(employeeService.GetEmployeeByEmail("manager@test.com")).thenReturn(Optional.of(manager));
+        when(employeeService.getEmployeeByEmail("manager@test.com")).thenReturn(Optional.of(manager));
 
         mockMvc.perform(get("/departments/details/1"))
                 .andExpect(status().isOk())

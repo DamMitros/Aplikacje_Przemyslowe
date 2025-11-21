@@ -69,7 +69,7 @@ class EmployeeViewControllerTest {
 
     @Test
     void addEmployee_success_shouldRedirect() throws Exception {
-        when(employeeService.GetEmployeeByEmail(anyString())).thenReturn(Optional.empty());
+        when(employeeService.getEmployeeByEmail(anyString())).thenReturn(Optional.empty());
 
         mockMvc.perform(post("/employees/add")
                         .param("fullName", "Jan Kowalski")
@@ -94,7 +94,7 @@ class EmployeeViewControllerTest {
 
     @Test
     void addEmployee_duplicateEmail_shouldReturnForm() throws Exception {
-        when(employeeService.GetEmployeeByEmail("duplicate@test.com")).thenReturn(Optional.of(new Employee()));
+        when(employeeService.getEmployeeByEmail("duplicate@test.com")).thenReturn(Optional.of(new Employee()));
 
         mockMvc.perform(post("/employees/add")
                         .param("fullName", "Jan Kowalski")
@@ -109,7 +109,7 @@ class EmployeeViewControllerTest {
     @Test
     void showEditForm_shouldReturnEditForm() throws Exception {
         Employee testEmp = new Employee("Test", "test@test.com", "Firma", Position.PROGRAMISTA, 8000);
-        when(employeeService.GetEmployeeByEmail("test@test.com")).thenReturn(Optional.of(testEmp));
+        when(employeeService.getEmployeeByEmail("test@test.com")).thenReturn(Optional.of(testEmp));
         when(departmentService.getAllDepartments()).thenReturn(List.of());
         mockMvc.perform(get("/employees/edit/test@test.com"))
                 .andExpect(status().isOk())
@@ -119,7 +119,7 @@ class EmployeeViewControllerTest {
 
     @Test
     void showEditForm_employeeNotFound_shouldReturnError() throws Exception {
-        when(employeeService.GetEmployeeByEmail("test@test.com")).thenReturn(Optional.empty());
+        when(employeeService.getEmployeeByEmail("test@test.com")).thenReturn(Optional.empty());
         mockMvc.perform(get("/employees/edit/test@test.com"))
                 .andExpect(status().is4xxClientError());
     }

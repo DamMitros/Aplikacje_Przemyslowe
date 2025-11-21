@@ -37,7 +37,7 @@ public class EmployeeController {
 
     @GetMapping("/{email}")
     public ResponseEntity<EmployeeDTO> getByEmail(@PathVariable String email) {
-        Employee emp = employees.GetEmployeeByEmail(email)
+        Employee emp = employees.getEmployeeByEmail(email)
                 .orElseThrow(() -> new EmployeeNotFoundException(email));
         return ResponseEntity.ok(toDto(emp));
     }
@@ -47,7 +47,7 @@ public class EmployeeController {
         if (dto == null || dto.getEmail() == null || dto.getEmail().isBlank()) {
             throw new InvalidDataException("Email is required");
         }
-        if (employees.GetEmployeeByEmail(dto.getEmail()).isPresent()) {
+        if (employees.getEmployeeByEmail(dto.getEmail()).isPresent()) {
             throw new DuplicateEmailException(dto.getEmail());
         }
         Employee entity = toEntity(dto);
@@ -71,7 +71,7 @@ public class EmployeeController {
         if (dto.getEmail() != null && !email.equalsIgnoreCase(dto.getEmail())) {
             throw new InvalidDataException("Email in path and body must match");
         }
-        employees.GetEmployeeByEmail(email).orElseThrow(() -> new EmployeeNotFoundException(email));
+        employees.getEmployeeByEmail(email).orElseThrow(() -> new EmployeeNotFoundException(email));
 
         Employee changes = toEntity(dto);
         changes.setEmail(email);

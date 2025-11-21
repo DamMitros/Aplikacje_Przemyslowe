@@ -189,7 +189,7 @@ class FileUploadControllerTest {
     void uploadDocument_success_returns201() throws Exception {
         MockMultipartFile file = new MockMultipartFile("file", "contract.pdf", "application/pdf", new byte[]{1,2,3});
         String email = "jan@example.com";
-        when(employeeService.GetEmployeeByEmail(email)).thenReturn(Optional.of(new Employee("Jan Kowalski", email, "TechCorp", com.example.zad1.model.Position.PREZES, 10000)));
+        when(employeeService.getEmployeeByEmail(email)).thenReturn(Optional.of(new Employee("Jan Kowalski", email, "TechCorp", com.example.zad1.model.Position.PREZES, 10000)));
         when(fileStorageService.saveEmployeeDocument(eq(email), any(), eq(DocumentType.CONTRACT)))
                 .thenAnswer(inv -> new com.example.zad1.model.EmployeeDocument(email, "uuid.pdf", "contract.pdf", DocumentType.CONTRACT, "/uploads/documents/jan@example.com/uuid.pdf"));
 
@@ -206,7 +206,7 @@ class FileUploadControllerTest {
     @DisplayName("POST /api/files/documents/{email} - 404 gdy brak pracownika")
     void uploadDocument_employeeNotFound_returns404() throws Exception {
         String email = "missing@example.com";
-        when(employeeService.GetEmployeeByEmail(email)).thenReturn(Optional.empty());
+        when(employeeService.getEmployeeByEmail(email)).thenReturn(Optional.empty());
         MockMultipartFile file = new MockMultipartFile("file", "contract.pdf", "application/pdf", new byte[]{1});
 
         mockMvc.perform(multipart("/api/files/documents/{email}", email)
@@ -219,7 +219,7 @@ class FileUploadControllerTest {
     @DisplayName("POST /api/files/documents/{email} - 400 na nieprawidłowe rozszerzenie")
     void uploadDocument_invalidExtension_returns400() throws Exception {
         String email = "jan@example.com";
-        when(employeeService.GetEmployeeByEmail(email)).thenReturn(Optional.of(new Employee("Jan", email, "Tech", com.example.zad1.model.Position.PROGRAMISTA, 5000)));
+        when(employeeService.getEmployeeByEmail(email)).thenReturn(Optional.of(new Employee("Jan", email, "Tech", com.example.zad1.model.Position.PROGRAMISTA, 5000)));
         MockMultipartFile file = new MockMultipartFile("file", "bad.exe", "application/octet-stream", new byte[]{1});
         Mockito.doThrow(new InvalidFileException("Niedozwolone rozszerenie"))
                 .when(fileStorageService).validateFile(any(), anySet(), anyLong(), anySet());
@@ -250,7 +250,7 @@ class FileUploadControllerTest {
         String email = "jan@example.com";
         String docId = "doc-123";
         var employee = new Employee("Jan Kowalski", email, "TechCorp", com.example.zad1.model.Position.PREZES, 10000);
-        when(employeeService.GetEmployeeByEmail(email)).thenReturn(Optional.of(employee));
+        when(employeeService.getEmployeeByEmail(email)).thenReturn(Optional.of(employee));
         var stored = new EmployeeDocument(email, "saved.pdf", "contract.pdf", DocumentType.CONTRACT, "/uploads/documents/jan@example.com/saved.pdf");
         when(fileStorageService.findDocument(email, docId)).thenReturn(Optional.of(stored));
         when(fileStorageService.loadFromUploads(anyString(), anyString())).thenReturn(new ByteArrayResource(new byte[]{1,2,3}));
@@ -316,7 +316,7 @@ class FileUploadControllerTest {
     @DisplayName("POST /api/files/photos/{email} - 201 Created on valid image upload")
     void uploadPhoto_success() throws Exception {
         String email = "anna@example.com";
-        when(employeeService.GetEmployeeByEmail(email)).thenReturn(Optional.of(new Employee("Anna Nowak", email, "TechCorp", com.example.zad1.model.Position.PREZES, 9000)));
+        when(employeeService.getEmployeeByEmail(email)).thenReturn(Optional.of(new Employee("Anna Nowak", email, "TechCorp", com.example.zad1.model.Position.PREZES, 9000)));
         MockMultipartFile file = new MockMultipartFile("file", "photo.jpg", "image/jpeg", new byte[]{1,2});
         when(fileStorageService.storeInUploads(any(), eq("photos"))).thenReturn("randomname.jpg");
         Path tmp = Files.createTempDirectory("uploadsTest");
@@ -334,7 +334,7 @@ class FileUploadControllerTest {
     @DisplayName("POST /api/files/photos/{email} - 400 Bad Request on invalid image extension")
     void uploadPhoto_invalidExtension() throws Exception {
         String email = "anna@example.com";
-        when(employeeService.GetEmployeeByEmail(email)).thenReturn(Optional.of(new Employee("Anna Nowak", email, "TechCorp", com.example.zad1.model.Position.PREZES, 9000)));
+        when(employeeService.getEmployeeByEmail(email)).thenReturn(Optional.of(new Employee("Anna Nowak", email, "TechCorp", com.example.zad1.model.Position.PREZES, 9000)));
         MockMultipartFile file = new MockMultipartFile("file", "photo.gif", "image/gif", new byte[]{1,2});
         Mockito.doThrow(new InvalidFileException("Niedozwolone rozszerzenie"))
                 .when(fileStorageService).validateFile(any(), anySet(), anyLong(), anySet());
@@ -349,7 +349,7 @@ class FileUploadControllerTest {
         String email = "old@example.com";
         var emp = new Employee("Old Photo", email, "Tech", com.example.zad1.model.Position.PROGRAMISTA, 7000);
         emp.setPhotoFileName("old.jpg");
-        when(employeeService.GetEmployeeByEmail(email)).thenReturn(Optional.of(emp));
+        when(employeeService.getEmployeeByEmail(email)).thenReturn(Optional.of(emp));
         MockMultipartFile file = new MockMultipartFile("file", "photo.jpg", "image/jpeg", new byte[]{1});
         when(fileStorageService.storeInUploads(any(), eq("photos"))).thenReturn("random.jpg");
         Path tmp = Files.createTempDirectory("uploadsTest2");
@@ -368,7 +368,7 @@ class FileUploadControllerTest {
     @DisplayName("POST /api/files/photos/{email} - 404 gdy brak pracownika")
     void uploadPhoto_employeeNotFound_returns404() throws Exception {
         String email = "missing@example.com";
-        when(employeeService.GetEmployeeByEmail(email)).thenReturn(Optional.empty());
+        when(employeeService.getEmployeeByEmail(email)).thenReturn(Optional.empty());
         MockMultipartFile file = new MockMultipartFile("file", "photo.jpg", "image/jpeg", new byte[]{1});
 
         mockMvc.perform(multipart("/api/files/photos/{email}", email).file(file))
@@ -379,7 +379,7 @@ class FileUploadControllerTest {
     @DisplayName("POST /api/files/photos/{email} - 400 gdy błąd podczas zapisu (move)")
     void uploadPhoto_moveFailure_returns400() throws Exception {
         String email = "fail@example.com";
-        when(employeeService.GetEmployeeByEmail(email)).thenReturn(Optional.of(new Employee("X", email, "Tech", com.example.zad1.model.Position.PROGRAMISTA, 4000)));
+        when(employeeService.getEmployeeByEmail(email)).thenReturn(Optional.of(new Employee("X", email, "Tech", com.example.zad1.model.Position.PROGRAMISTA, 4000)));
         MockMultipartFile file = new MockMultipartFile("file", "photo.jpg", "image/jpeg", new byte[]{1});
         when(fileStorageService.storeInUploads(any(), eq("photos"))).thenReturn("notExisting.jpg");
         Path tmp = Files.createTempDirectory("uploadsTest3");
@@ -395,7 +395,7 @@ class FileUploadControllerTest {
     @DisplayName("GET /api/files/photos/{email} - 404 gdy brak użytkownika")
     void getPhoto_employeeNotFound_returns404() throws Exception {
         String email = "none@example.com";
-        when(employeeService.GetEmployeeByEmail(email)).thenReturn(Optional.empty());
+        when(employeeService.getEmployeeByEmail(email)).thenReturn(Optional.empty());
         mockMvc.perform(get("/api/files/photos/{email}", email))
                 .andExpect(status().isNotFound());
     }
@@ -406,7 +406,7 @@ class FileUploadControllerTest {
         String email = "png@example.com";
         var emp = new Employee("PNG", email, "Tech", com.example.zad1.model.Position.MANAGER, 6000);
         emp.setPhotoFileName("img.png");
-        when(employeeService.GetEmployeeByEmail(email)).thenReturn(Optional.of(emp));
+        when(employeeService.getEmployeeByEmail(email)).thenReturn(Optional.of(emp));
         when(fileStorageService.loadFromUploads(eq("photos"), eq("img.png"))).thenReturn(new ByteArrayResource(new byte[]{1}));
 
         mockMvc.perform(get("/api/files/photos/{email}", email))
@@ -420,7 +420,7 @@ class FileUploadControllerTest {
         String email = "jpg@example.com";
         var emp = new Employee("JPG", email, "Tech", com.example.zad1.model.Position.MANAGER, 6000);
         emp.setPhotoFileName("img.jpg");
-        when(employeeService.GetEmployeeByEmail(email)).thenReturn(Optional.of(emp));
+        when(employeeService.getEmployeeByEmail(email)).thenReturn(Optional.of(emp));
         when(fileStorageService.loadFromUploads(eq("photos"), eq("img.jpg"))).thenReturn(new ByteArrayResource(new byte[]{1}));
 
         mockMvc.perform(get("/api/files/photos/{email}", email))
@@ -449,7 +449,7 @@ class FileUploadControllerTest {
         String email = "brak@example.com";
         var emp = new Employee("Brak Zdjęcia", email, "TechCorp", com.example.zad1.model.Position.PREZES, 5000);
         emp.setPhotoFileName(null);
-        when(employeeService.GetEmployeeByEmail(email)).thenReturn(Optional.of(emp));
+        when(employeeService.getEmployeeByEmail(email)).thenReturn(Optional.of(emp));
         mockMvc.perform(get("/api/files/photos/{email}", email))
                 .andExpect(status().isNotFound());
     }

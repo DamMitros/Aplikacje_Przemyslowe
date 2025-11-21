@@ -62,7 +62,7 @@ public class EmployeeViewController {
             model.addAttribute("departments", departmentService.getAllDepartments());
             return "employees/add-form";
         }
-        if (employeeService.GetEmployeeByEmail(employee.getEmail()).isPresent()) {
+        if (employeeService.getEmployeeByEmail(employee.getEmail()).isPresent()) {
             bindingResult.rejectValue("email", "error.employee", "Pracownik o tym emailu już istnieje");
             model.addAttribute("positions", Position.values());
             model.addAttribute("statuses", EmploymentStatus.values());
@@ -77,7 +77,7 @@ public class EmployeeViewController {
 
     @GetMapping("/edit/{email}")
     public String showEditForm(@PathVariable String email, Model model) {
-        Employee employee = employeeService.GetEmployeeByEmail(email)
+        Employee employee = employeeService.getEmployeeByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono pracownika: " + email));
         model.addAttribute("employee", employee);
         model.addAttribute("positions", Position.values());

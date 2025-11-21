@@ -125,7 +125,7 @@ public class DepartmentViewController {
                 .collect(Collectors.toList());
 
         String managerName = department.getManagerEmail() != null ?
-                employeeService.GetEmployeeByEmail(department.getManagerEmail())
+                employeeService.getEmployeeByEmail(department.getManagerEmail())
                         .map(Employee::getFullName)
                         .orElse("Brak danych") : "Nieprzypisany";
 

@@ -75,7 +75,7 @@ public class FileUploadController {
     public ResponseEntity<EmployeeDocument> uploadDocument(@PathVariable String email,
                                                            @RequestParam("file") MultipartFile file,
                                                            @RequestParam("type") DocumentType type){
-        Employee emp = employeeService.GetEmployeeByEmail(email).orElseThrow(() -> new EmployeeNotFoundException(email));
+        Employee emp = employeeService.getEmployeeByEmail(email).orElseThrow(() -> new EmployeeNotFoundException(email));
         storage.validateFile(
                 file,
                 Set.of("pdf","png","jpg","jpeg","doc","docx","txt"),
@@ -122,7 +122,7 @@ public class FileUploadController {
 
     @PostMapping("/photos/{email}")
     public ResponseEntity<Map<String,String>> uploadPhoto(@PathVariable String email, @RequestParam("file") MultipartFile file){
-        Employee emp = employeeService.GetEmployeeByEmail(email).orElseThrow(() -> new EmployeeNotFoundException(email));
+        Employee emp = employeeService.getEmployeeByEmail(email).orElseThrow(() -> new EmployeeNotFoundException(email));
         storage.validateFile(file, Set.of("jpg","jpeg","png"), 2L*1024*1024, Set.of("image/jpeg","image/png"));
         String ext = storage.getExtension(Optional.ofNullable(file.getOriginalFilename()).orElse("jpg"));
         String fileName = email + (ext.isBlank()?"":"."+ext);
@@ -143,7 +143,7 @@ public class FileUploadController {
 
     @GetMapping("/photos/{email}")
     public ResponseEntity<Resource> getPhoto(@PathVariable String email){
-        Employee emp = employeeService.GetEmployeeByEmail(email).orElseThrow(() -> new EmployeeNotFoundException(email));
+        Employee emp = employeeService.getEmployeeByEmail(email).orElseThrow(() -> new EmployeeNotFoundException(email));
         String name = emp.getPhotoFileName();
         if (name == null || name.isBlank()) throw new com.example.zad1.exception.FileNotFoundException("Brak zdjęcia dla pracownika");
         Resource res = storage.loadFromUploads("photos", name);

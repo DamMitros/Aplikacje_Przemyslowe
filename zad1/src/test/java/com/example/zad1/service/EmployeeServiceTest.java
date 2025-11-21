@@ -1,36 +1,54 @@
 package com.example.zad1.service;
 
+import com.example.zad1.dao.EmployeeDAO;
+import com.example.zad1.exception.EmployeeNotFoundException;
 import com.example.zad1.model.Employee;
 import com.example.zad1.model.EmploymentStatus;
 import com.example.zad1.model.Position;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class EmployeeServiceTest {
+    private Employee emp1;
+    private Employee emp2;
+
+    @Mock
+    private EmployeeDAO employeeDAO;
+
+    @InjectMocks
     private EmployeeService employeeService;
-    Employee emp = new Employee("Justyna Steczkowska", "steczkowska1764@gmail.com", "TechCorp", Position.PREZES, Position.PREZES.getSalary());
-    Employee emp2 = new Employee("Edyta Gorniak", "edyth@gmail.com", "TechCorp", Position.WICEPREZES, Position.WICEPREZES.getSalary());
-    @BeforeEach
+
+     @BeforeEach
     void setUp() {
-        employeeService = new EmployeeService();
-    }
+         emp1 = new Employee("Justyna Steczkowska", "steczkowska1764@gmail.com", "TechCorp", Position.PREZES, Position.PREZES.getSalary());
+         emp2 = new Employee("Edyta Gorniak", "edyth@gmail.com", "TechCorp", Position.WICEPREZES, Position.WICEPREZES.getSalary());
+     }
 
     @Test
     void shouldAddEmployeeWhenEmployeeValid() {
-        assertTrue(employeeService.addEmployee(emp));
+        when(employeeDAO.findByEmail(emp1.getEmail())).thenReturn(Optional.empty());
+        assertTrue(employeeService.addEmployee(emp1));
     }
 
     @Test
     void shouldNotAddEmployeeWhenEmployeeDuplicate() {
-        employeeService.addEmployee(emp);
-        assertFalse(employeeService.addEmployee(emp));
+        when(employeeDAO.findByEmail(emp1.getEmail())).thenReturn(Optional.of(emp1));
+        assertFalse(employeeService.addEmployee(emp1));
     }
 
     @Test
@@ -58,7 +76,7 @@ public class EmployeeServiceTest {
 
     @Test
     void displayAllWhenEmployeesExist() {
-        employeeService.addEmployee(emp);
+        employeeService.addEmployee(emp1);
         employeeService.addEmployee(emp2);
         employeeService.displayAll();
     }
@@ -70,7 +88,7 @@ public class EmployeeServiceTest {
 
     @Test
     void getEmployeeByCompany_WhenExistingCompany() {
-        employeeService.addEmployee(emp);
+         when(employeeDAO.findAll()).thenReturn(List.of(emp1));
         assertFalse(employeeService.getEmployeeByCompany("TechCorp").isEmpty());
     }
 
@@ -93,28 +111,36 @@ public class EmployeeServiceTest {
 
     @Test
     void getAlphabetically() {
-        employeeService.addEmployee(emp);
-        employeeService.addEmployee(emp2);
-        assertEquals(2, employeeService.getAlphabetically().size());
-        assertEquals(emp2, employeeService.getAlphabetically().get(0));
+         when(employeeDAO.findAll()).thenReturn(List.of(emp1, emp2));
+         List<Employee> sorted = employeeService.getAllAlphabetically();
+
+        assertAll(
+                ()->assertEquals(2, sorted.size()),
+                ()->assertEquals(emp2, sorted.get(0))
+        );
     }
 
     @Test
     void groupByPosition() {
-        employeeService.addEmployee(emp);
-        employeeService.addEmployee(emp2);
-        assertEquals(2, employeeService.groupByPosition().size());
-        assertTrue(employeeService.groupByPosition().containsKey(Position.PREZES));
-        assertTrue(employeeService.groupByPosition().containsKey(Position.WICEPREZES));
+         when(employeeDAO.findAll()).thenReturn(List.of(emp1, emp2));
+
+        assertAll(
+                ()->assertEquals(2, employeeService.groupByPosition().size()),
+                ()->assertTrue(employeeService.groupByPosition().containsKey(Position.PREZES)),
+                ()->assertTrue(employeeService.groupByPosition().containsKey(Position.WICEPREZES))
+        );
     }
 
     @Test
     void countByPosition() {
-        employeeService.addEmployee(emp);
-        employeeService.addEmployee(emp2);
-        assertEquals(2, employeeService.countByPosition().size());
-        assertEquals(1, employeeService.countByPosition().get(Position.PREZES));
-        assertEquals(1, employeeService.countByPosition().get(Position.WICEPREZES));
+        when(employeeDAO.findAll()).thenReturn(List.of(emp1, emp2));
+        Map<Position, Integer> counts = employeeService.countByPosition();
+
+        assertAll(
+                ()->assertEquals(2, counts.size()),
+                ()->assertTrue(counts.containsKey(Position.PREZES)),
+                ()->assertTrue(counts.containsKey(Position.WICEPREZES))
+        );
     }
 
     @Test
@@ -124,7 +150,7 @@ public class EmployeeServiceTest {
 
     @Test
     void getAverageSalary_WhenAddedEmployees() {
-        employeeService.addEmployee(emp);
+        when(employeeDAO.findAll()).thenReturn(List.of(emp1));
         assertEquals(Position.PREZES.getSalary(), employeeService.getAverageSalary());
     }
 
@@ -135,8 +161,7 @@ public class EmployeeServiceTest {
 
     @Test
     void getHighestSalary_WhenAddedEmployee() {
-        employeeService.addEmployee(emp);
-        employeeService.getHighestSalary();
+         when(employeeDAO.findAll()).thenReturn(List.of(emp1));
         assertFalse(employeeService.getHighestSalary().isEmpty());
     }
 
@@ -144,9 +169,7 @@ public class EmployeeServiceTest {
     void testValidateSalaryConsistency() {
         Employee empNullPosition = new Employee("Svietlana Gerasimova", "svietla@outlook.com", "TechnoCorp", null, 3600);
         Employee empInvalidSalary = new Employee("Igor Ivanov", "igorek@outlook.ru", "TechnoCorp", Position.STAZYSTA, 29);
-        employeeService.addEmployee(emp);
-        employeeService.addEmployee(empNullPosition);
-        employeeService.addEmployee(empInvalidSalary);
+        when(employeeDAO.findAll()).thenReturn(List.of(emp1, empNullPosition, empInvalidSalary));
         assertEquals(1, employeeService.validateSalaryConsistency().size());
     }
 
@@ -171,95 +194,110 @@ public class EmployeeServiceTest {
 
     @Test
     void testGetCompanyStatisticsWhenAddedEmployees() {
-        employeeService.addEmployee(emp);
-        employeeService.addEmployee(emp2);
-        assertEquals(1, employeeService.getCompanyStatistics().size());
-        assertTrue(employeeService.getCompanyStatistics().containsKey("TechCorp"));
+        when(employeeDAO.findAll()).thenReturn(List.of(emp1,emp2));
+        assertAll(
+                ()-> assertEquals(1, employeeService.getCompanyStatistics().size()),
+                ()-> assertTrue(employeeService.getCompanyStatistics().containsKey("TechCorp"))
+        );
     }
 
     @Test
     void testGetAllEmployees() {
-        employeeService.addEmployee(emp);
-        employeeService.addEmployee(emp2);
+        when(employeeDAO.findAll()).thenReturn(List.of(emp1,emp2));
         List<Employee> all = employeeService.getAllEmployees();
-        assertEquals(2, all.size());
-        assertTrue(all.contains(emp));
-        assertTrue(all.contains(emp2));
+
+        assertAll(
+                ()->assertEquals(2, all.size()),
+                ()-> assertTrue(all.contains(emp1)),
+                ()-> assertTrue(all.contains(emp2))
+        );
     }
 
     @Test
     void testGetByStatus() {
-        emp.setStatus(EmploymentStatus.ACTIVE);
+        emp1.setStatus(EmploymentStatus.ACTIVE);
         emp2.setStatus(EmploymentStatus.TERMINATED);
-        employeeService.addEmployee(emp);
-        employeeService.addEmployee(emp2);
 
+        when(employeeDAO.findAll()).thenReturn(List.of(emp1,emp2));
         List<Employee> active = employeeService.getByStatus(EmploymentStatus.ACTIVE);
-        assertEquals(1, active.size());
-        assertEquals(emp, active.get(0));
+        assertAll(
+                ()-> assertEquals(1, active.size()),
+                ()-> assertEquals(emp1, active.get(0))
+        );
     }
 
     @Test
     void testCountByStatus() {
-        emp.setStatus(EmploymentStatus.ACTIVE);
+        emp1.setStatus(EmploymentStatus.ACTIVE);
         emp2.setStatus(EmploymentStatus.ACTIVE);
-        employeeService.addEmployee(emp);
-        employeeService.addEmployee(emp2);
 
+        when(employeeDAO.findAll()).thenReturn(List.of(emp1,emp2));
         Map<EmploymentStatus, Integer> counts = employeeService.countByStatus();
-        assertEquals(1, counts.size());
-        assertEquals(2, counts.get(EmploymentStatus.ACTIVE));
+
+        assertAll(
+                ()->assertEquals(1, counts.size()),
+                ()-> assertEquals(2, counts.get(EmploymentStatus.ACTIVE))
+        );
     }
 
     @Test
     void testGetEmployeeByEmail() {
-        employeeService.addEmployee(emp);
-        Optional<Employee> found = employeeService.GetEmployeeByEmail(emp.getEmail());
-        assertTrue(found.isPresent());
-        assertEquals(emp, found.get());
+        when(employeeDAO.findByEmail(emp1.getEmail())).thenReturn(Optional.of(emp1));
+        Optional<Employee> found = employeeService.getEmployeeByEmail(emp1.getEmail());
+        assertAll(
+                ()-> assertTrue(found.isPresent()),
+                ()-> assertEquals(emp1, found.get())
+        );
     }
 
     @Test
     void testGetAverageSalaryByCompany() {
-        employeeService.addEmployee(emp);
-        employeeService.addEmployee(emp2);
+         when(employeeDAO.findAll()).thenReturn(List.of(emp1,emp2));
         double avg = employeeService.getAverageSalaryByCompany("TechCorp");
-        assertEquals((emp.getSalary() + emp2.getSalary()) / 2.0, avg);
+        assertEquals((emp1.getSalary() + emp2.getSalary()) / 2.0, avg);
     }
 
     @Test
     void testUpdateStatusByEmail() {
-        employeeService.addEmployee(emp);
-        employeeService.updateStatusByEmail(emp.getEmail(), EmploymentStatus.TERMINATED);
-        Optional<Employee> updated = employeeService.GetEmployeeByEmail(emp.getEmail());
-        assertTrue(updated.isPresent());
-        assertEquals(EmploymentStatus.TERMINATED, updated.get().getStatus());
+        when(employeeDAO.findByEmail(emp1.getEmail())).thenReturn(Optional.of(emp1));
+
+        Optional<Employee> updated = employeeService.updateStatusByEmail(emp1.getEmail(), EmploymentStatus.TERMINATED);
+        assertAll(
+                ()-> assertTrue(updated.isPresent()),
+                ()-> assertEquals(EmploymentStatus.TERMINATED, updated.get().getStatus())
+        );
     }
 
     @Test
     void testDeleteEmployeeByEmail() {
-        employeeService.addEmployee(emp);
-        assertTrue(employeeService.deleteEmployeeByEmail(emp.getEmail()));
-        assertFalse(employeeService.getAllEmployees().contains(emp));
+        when(employeeDAO.delete(emp1.getEmail())).thenReturn(true);
+        when(employeeDAO.delete("nonexistent@email.com")).thenReturn(false);
 
-        assertFalse(employeeService.deleteEmployeeByEmail("nonexistent@email.com"));
-    }
+        assertAll(
+                ()-> assertTrue(employeeService.deleteEmployeeByEmail(emp1.getEmail())),
+                ()-> assertFalse(employeeService.deleteEmployeeByEmail("nonexistent@email.com"))
+        );
+     }
 
     @Test
     void testUpdateEmployeeByEmailSuccess() {
-        employeeService.addEmployee(emp);
+        when(employeeDAO.findByEmail(emp1.getEmail())).thenReturn(Optional.of(emp1));
+
         Employee changes = new Employee("Justyna Nowa", "steczkowska1764@gmail.com", "NewCorp", Position.MANAGER, 5000);
         changes.setStatus(EmploymentStatus.TERMINATED);
 
-        Optional<Employee> updated = employeeService.UpdateEmployeeByEmail(emp.getEmail(), changes);
-        assertTrue(updated.isPresent());
+        Optional<Employee> updated = employeeService.UpdateEmployeeByEmail(emp1.getEmail(), changes);
 
+        assertTrue(updated.isPresent());
         Employee result = updated.get();
-        assertEquals("Justyna Nowa", result.getFullName());
-        assertEquals("NewCorp", result.getCompanyName());
-        assertEquals(Position.MANAGER, result.getPosition());
-        assertEquals(5000, result.getSalary());
-        assertEquals(EmploymentStatus.TERMINATED, result.getStatus());
+
+        assertAll(
+                ()-> assertEquals("Justyna Nowa", result.getFullName()),
+                ()-> assertEquals("NewCorp", result.getCompanyName()),
+                ()-> assertEquals(Position.MANAGER, result.getPosition()),
+                ()-> assertEquals(5000, result.getSalary()),
+                ()-> assertEquals(EmploymentStatus.TERMINATED, result.getStatus())
+        );
     }
 
     @Test
@@ -278,8 +316,8 @@ public class EmployeeServiceTest {
 
     @Test
     void testUpdateEmployeeByEmailNullChanges() {
-        employeeService.addEmployee(emp);
-        Optional<Employee> updated = employeeService.UpdateEmployeeByEmail(emp.getEmail(), null);
+        employeeService.addEmployee(emp1);
+        Optional<Employee> updated = employeeService.UpdateEmployeeByEmail(emp1.getEmail(), null);
         assertTrue(updated.isEmpty());
     }
 }
