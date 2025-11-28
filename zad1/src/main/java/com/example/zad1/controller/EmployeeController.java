@@ -75,7 +75,7 @@ public class EmployeeController {
 
         Employee changes = toEntity(dto);
         changes.setEmail(email);
-        Employee updated = employees.UpdateEmployeeByEmail(email, changes)
+        Employee updated = employees.updateEmployeeByEmail(email, changes)
                 .orElseThrow(() -> new EmployeeNotFoundException(email));
         return ResponseEntity.ok(toDto(updated));
     }

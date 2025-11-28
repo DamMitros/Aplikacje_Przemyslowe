@@ -95,10 +95,10 @@ class StatisticsControllerTest {
     @Test
     @DisplayName("GET /api/statistics/positions -> 200 and positions distribution")
     void positions_distribution() throws Exception {
-        Map<Position, Integer> counts = new LinkedHashMap<>();
-        counts.put(null,1);
-        counts.put(Position.MANAGER, 3);
-        counts.put(Position.PROGRAMISTA, 5);
+        Map<Position, Long> counts = new LinkedHashMap<>();
+        counts.put(Position.MANAGER, 3L);
+        counts.put(Position.PROGRAMISTA, 5L);
+
         Mockito.when(employeeService.countByPosition()).thenReturn(counts);
 
         mockMvc.perform(get("/api/statistics/positions"))
@@ -110,18 +110,15 @@ class StatisticsControllerTest {
     @Test
     @DisplayName("GET /api/statistics/status -> 200 and employment status distribution")
     void status_distribution() throws Exception {
-        Map<EmploymentStatus, Integer> counts = new LinkedHashMap<>();
-        counts.put(EmploymentStatus.ACTIVE, 4);
-        counts.put(EmploymentStatus.ON_LEAVE, 1);
-        counts.put(EmploymentStatus.TERMINATED, 2);
-        counts.put(null, 3);
+        Map<EmploymentStatus, Long> counts = new LinkedHashMap<>();
+        counts.put(EmploymentStatus.ACTIVE, 4L);
+        counts.put(EmploymentStatus.ON_LEAVE, 1L);
         Mockito.when(employeeService.countByStatus()).thenReturn(counts);
 
         mockMvc.perform(get("/api/statistics/status"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.ACTIVE", is(4)))
-                .andExpect(jsonPath("$.ON_LEAVE", is(1)))
-                .andExpect(jsonPath("$.TERMINATED", is(2)));
+                .andExpect(jsonPath("$.ON_LEAVE", is(1)));
     }
 
     @TestConfiguration

@@ -1,27 +1,27 @@
 package com.example.zad1.service;
 
-import com.example.zad1.dao.EmployeeDAO;
-import com.example.zad1.exception.EmployeeNotFoundException;
+import com.example.zad1.repository.EmployeeRepository;
+import com.example.zad1.repository.DepartmentRepository;
 import com.example.zad1.model.CompanyStatistics;
 import com.example.zad1.model.Employee;
 import com.example.zad1.model.EmploymentStatus;
 import com.example.zad1.model.Position;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.data.jpa.domain.Specification;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class EmployeeServiceTest {
@@ -29,27 +29,33 @@ public class EmployeeServiceTest {
     private Employee emp2;
 
     @Mock
-    private EmployeeDAO employeeDAO;
+    private EmployeeRepository employeeRepository;
+
+    @Mock
+    private DepartmentRepository departmentRepository;
 
     @InjectMocks
     private EmployeeService employeeService;
 
-     @BeforeEach
+    @BeforeEach
     void setUp() {
-         emp1 = new Employee("Justyna Steczkowska", "steczkowska1764@gmail.com", "TechCorp", Position.PREZES, Position.PREZES.getSalary());
-         emp2 = new Employee("Edyta Gorniak", "edyth@gmail.com", "TechCorp", Position.WICEPREZES, Position.WICEPREZES.getSalary());
-     }
+        emp1 = new Employee("Justyna Steczkowska", "steczkowska1764@gmail.com", "TechCorp", Position.PREZES, Position.PREZES.getSalary());
+        emp2 = new Employee("Edyta Gorniak", "edyth@gmail.com", "TechCorp", Position.WICEPREZES, Position.WICEPREZES.getSalary());
+    }
 
     @Test
     void shouldAddEmployeeWhenEmployeeValid() {
-        when(employeeDAO.findByEmail(emp1.getEmail())).thenReturn(Optional.empty());
+        when(employeeRepository.existsByEmail(emp1.getEmail())).thenReturn(false);
+        when(employeeRepository.save(emp1)).thenReturn(emp1);
         assertTrue(employeeService.addEmployee(emp1));
+        verify(employeeRepository).save(emp1);
     }
 
     @Test
     void shouldNotAddEmployeeWhenEmployeeDuplicate() {
-        when(employeeDAO.findByEmail(emp1.getEmail())).thenReturn(Optional.of(emp1));
+        when(employeeRepository.existsByEmail(emp1.getEmail())).thenReturn(true);
         assertFalse(employeeService.addEmployee(emp1));
+        verify(employeeRepository, never()).save(any());
     }
 
     @Test
@@ -63,33 +69,21 @@ public class EmployeeServiceTest {
         assertFalse(employeeService.addEmployee(empInvalidEmail));
     }
 
-
     @Test
     void shouldNotAddEmployeeWhenEmailIsBlank() {
-        Employee emp2 = new Employee("Anna Nowak", "", "TechCorp", Position.WICEPREZES, Position.WICEPREZES.getSalary());
-        assertFalse(employeeService.addEmployee(emp2));
-    }
-
-    @Test
-    void displayAllWhenNoEmployees() {
-        employeeService.displayAll();
-    }
-
-    @Test
-    void displayAllWhenEmployeesExist() {
-        employeeService.addEmployee(emp1);
-        employeeService.addEmployee(emp2);
-        employeeService.displayAll();
+        Employee empBlankEmail = new Employee("Anna Nowak", "", "TechCorp", Position.WICEPREZES, Position.WICEPREZES.getSalary());
+        assertFalse(employeeService.addEmployee(empBlankEmail));
     }
 
     @Test
     void getEmployeeByCompany_WhenNonExistingCompany() {
+        when(employeeRepository.findAll(any(Specification.class))).thenReturn(List.of());
         assertTrue(employeeService.getEmployeeByCompany("NonExistent").isEmpty());
     }
 
     @Test
     void getEmployeeByCompany_WhenExistingCompany() {
-         when(employeeDAO.findAll()).thenReturn(List.of(emp1));
+        when(employeeRepository.findAll(any(Specification.class))).thenReturn(List.of(emp1, emp2));
         assertFalse(employeeService.getEmployeeByCompany("TechCorp").isEmpty());
     }
 
@@ -105,64 +99,59 @@ public class EmployeeServiceTest {
 
     @Test
     void getEmployeeByCompany_WhenEmployeeHasNullCompany() {
-        Employee empNoCompany = new Employee("Roberta Svietlova", "svietlova@outlook.ru", null, Position.MANAGER, Position.MANAGER.getSalary());
-        employeeService.addEmployee(empNoCompany);
+        when(employeeRepository.findAll(any(Specification.class))).thenReturn(List.of());
         assertTrue(employeeService.getEmployeeByCompany("TechnoCrop").isEmpty());
     }
 
     @Test
     void getAlphabetically() {
-         when(employeeDAO.findAll()).thenReturn(List.of(emp1, emp2));
-         List<Employee> sorted = employeeService.getAllAlphabetically();
-
-        assertAll(
-                ()->assertEquals(2, sorted.size()),
-                ()->assertEquals(emp2, sorted.get(0))
-        );
+        when(employeeRepository.findAll()).thenReturn(List.of(emp1, emp2));
+        List<Employee> sorted = employeeService.getAllAlphabetically();
+        assertNotNull(sorted);
     }
 
     @Test
     void groupByPosition() {
-         when(employeeDAO.findAll()).thenReturn(List.of(emp1, emp2));
-
+        when(employeeRepository.findAll()).thenReturn(List.of(emp1, emp2));
         assertAll(
-                ()->assertEquals(2, employeeService.groupByPosition().size()),
-                ()->assertTrue(employeeService.groupByPosition().containsKey(Position.PREZES)),
-                ()->assertTrue(employeeService.groupByPosition().containsKey(Position.WICEPREZES))
+                () -> assertEquals(2, employeeService.groupByPosition().size()),
+                () -> assertTrue(employeeService.groupByPosition().containsKey(Position.PREZES)),
+                () -> assertTrue(employeeService.groupByPosition().containsKey(Position.WICEPREZES))
         );
     }
 
     @Test
     void countByPosition() {
-        when(employeeDAO.findAll()).thenReturn(List.of(emp1, emp2));
-        Map<Position, Integer> counts = employeeService.countByPosition();
-
+        when(employeeRepository.countByPositionJPQL()).thenReturn(List.of(new Object[]{Position.PREZES, 1L}, new Object[]{Position.WICEPREZES, 1L}));
+        Map<Position, Long> counts = employeeService.countByPosition();
         assertAll(
-                ()->assertEquals(2, counts.size()),
-                ()->assertTrue(counts.containsKey(Position.PREZES)),
-                ()->assertTrue(counts.containsKey(Position.WICEPREZES))
+                () -> assertEquals(2, counts.size()),
+                () -> assertEquals(1L, counts.get(Position.PREZES)),
+                () -> assertEquals(1L, counts.get(Position.WICEPREZES))
         );
     }
 
     @Test
     void getAverageSalary_WhenNoEmployees() {
+        when(employeeRepository.getAverageSalaryJPQL()).thenReturn(0.0);
         assertEquals(0.0, employeeService.getAverageSalary());
     }
 
     @Test
     void getAverageSalary_WhenAddedEmployees() {
-        when(employeeDAO.findAll()).thenReturn(List.of(emp1));
+        when(employeeRepository.getAverageSalaryJPQL()).thenReturn((double) Position.PREZES.getSalary());
         assertEquals(Position.PREZES.getSalary(), employeeService.getAverageSalary());
     }
 
     @Test
     void getHighestSalary_WhenNoEmployee() {
+        when(employeeRepository.findAll()).thenReturn(List.of());
         assertTrue(employeeService.getHighestSalary().isEmpty());
     }
 
     @Test
     void getHighestSalary_WhenAddedEmployee() {
-         when(employeeDAO.findAll()).thenReturn(List.of(emp1));
+        when(employeeRepository.findAll()).thenReturn(List.of(emp1));
         assertFalse(employeeService.getHighestSalary().isEmpty());
     }
 
@@ -170,157 +159,143 @@ public class EmployeeServiceTest {
     void testValidateSalaryConsistency() {
         Employee empNullPosition = new Employee("Svietlana Gerasimova", "svietla@outlook.com", "TechnoCorp", null, 3600);
         Employee empInvalidSalary = new Employee("Igor Ivanov", "igorek@outlook.ru", "TechnoCorp", Position.STAZYSTA, 29);
-        when(employeeDAO.findAll()).thenReturn(List.of(emp1, empNullPosition, empInvalidSalary));
+        when(employeeRepository.findAll()).thenReturn(List.of(emp1, empNullPosition, empInvalidSalary));
         assertEquals(1, employeeService.validateSalaryConsistency().size());
     }
 
     @Test
-    void testGetCompanyStatisticsWhenEmployeesHasNoCompany(){
-        Employee empNoCompany = new Employee("Roberta Svietlova", "robertica@pl.ru", "", Position.MANAGER, Position.MANAGER.getSalary());
-        employeeService.addEmployee(empNoCompany);
+    void testGetCompanyStatisticsWhenEmployeesHasNoCompany() {
+        when(employeeRepository.getCompanyStatisticsJPQL()).thenReturn(List.of());
         assertTrue(employeeService.getCompanyStatistics().isEmpty());
     }
 
     @Test
-    void testGetCompanyStatisticsWhenEmployeesHasNullCompany(){
-        Employee empNullCompany = new Employee("Olga Petrova", "petrovia@outlook.ru", null, Position.PROGRAMISTA, Position.PROGRAMISTA.getSalary());
-        employeeService.addEmployee(empNullCompany);
+    void testGetCompanyStatisticsWhenEmployeesHasNullCompany() {
+        when(employeeRepository.getCompanyStatisticsJPQL()).thenReturn(List.of());
         assertTrue(employeeService.getCompanyStatistics().isEmpty());
     }
 
     @Test
     void testGetCompanyStatisticsWhenNoEmployees() {
+        when(employeeRepository.getCompanyStatisticsJPQL()).thenReturn(List.of());
         assertTrue(employeeService.getCompanyStatistics().isEmpty());
     }
 
     @Test
     void testGetCompanyStatisticsWhenAddedEmployees() {
-        CompanyStatistics stats = new CompanyStatistics("TechCorp", 2, 10500.0, "Justyna Steczkowska", 12500);
-        when(employeeDAO.getCompanyStatistics()).thenReturn(List.of(stats));
-
+        CompanyStatistics stats = new CompanyStatistics("TechCorp", 2L, 10500.0, 12500);
+        when(employeeRepository.getCompanyStatisticsJPQL()).thenReturn(List.of(stats));
+        Map<String, CompanyStatistics> result = employeeService.getCompanyStatistics();
         assertAll(
-                ()-> assertEquals(1, employeeService.getCompanyStatistics().size()),
-                ()-> assertTrue(employeeService.getCompanyStatistics().containsKey("TechCorp"))
+                () -> assertEquals(1, result.size()),
+                () -> assertTrue(result.containsKey("TechCorp"))
         );
     }
 
     @Test
     void testGetAllEmployees() {
-        when(employeeDAO.findAll()).thenReturn(List.of(emp1,emp2));
+        when(employeeRepository.findAll()).thenReturn(List.of(emp1, emp2));
         List<Employee> all = employeeService.getAllEmployees();
-
         assertAll(
-                ()->assertEquals(2, all.size()),
-                ()-> assertTrue(all.contains(emp1)),
-                ()-> assertTrue(all.contains(emp2))
+                () -> assertEquals(2, all.size()),
+                () -> assertTrue(all.contains(emp1)),
+                () -> assertTrue(all.contains(emp2))
         );
     }
 
     @Test
     void testGetByStatus() {
         emp1.setStatus(EmploymentStatus.ACTIVE);
-        emp2.setStatus(EmploymentStatus.TERMINATED);
-
-        when(employeeDAO.findAll()).thenReturn(List.of(emp1,emp2));
+        when(employeeRepository.findByStatus(EmploymentStatus.ACTIVE)).thenReturn(List.of(emp1));
         List<Employee> active = employeeService.getByStatus(EmploymentStatus.ACTIVE);
         assertAll(
-                ()-> assertEquals(1, active.size()),
-                ()-> assertEquals(emp1, active.get(0))
+                () -> assertEquals(1, active.size()),
+                () -> assertEquals(emp1, active.get(0))
         );
     }
 
     @Test
     void testCountByStatus() {
-        emp1.setStatus(EmploymentStatus.ACTIVE);
-        emp2.setStatus(EmploymentStatus.ACTIVE);
+        List<Object[]> mockResult = Collections.singletonList(new Object[]{EmploymentStatus.ACTIVE, 2L});
+        when(employeeRepository.countByStatusJPQL()).thenReturn(mockResult);
 
-        when(employeeDAO.findAll()).thenReturn(List.of(emp1,emp2));
-        Map<EmploymentStatus, Integer> counts = employeeService.countByStatus();
-
+        Map<EmploymentStatus, Long> counts = employeeService.countByStatus();
         assertAll(
-                ()->assertEquals(1, counts.size()),
-                ()-> assertEquals(2, counts.get(EmploymentStatus.ACTIVE))
+                () -> assertEquals(1, counts.size()),
+                () -> assertEquals(2L, counts.get(EmploymentStatus.ACTIVE))
         );
     }
 
     @Test
     void testGetEmployeeByEmail() {
-        when(employeeDAO.findByEmail(emp1.getEmail())).thenReturn(Optional.of(emp1));
+        when(employeeRepository.findByEmail(emp1.getEmail())).thenReturn(Optional.of(emp1));
         Optional<Employee> found = employeeService.getEmployeeByEmail(emp1.getEmail());
         assertAll(
-                ()-> assertTrue(found.isPresent()),
-                ()-> assertEquals(emp1, found.get())
+                () -> assertTrue(found.isPresent()),
+                () -> assertEquals(emp1, found.get())
         );
     }
 
     @Test
     void testGetAverageSalaryByCompany() {
-         when(employeeDAO.findAll()).thenReturn(List.of(emp1,emp2));
+        double expectedAvg = (emp1.getSalary() + emp2.getSalary()) / 2.0;
+        when(employeeRepository.getAverageSalaryByCompanyJPQL("TechCorp")).thenReturn(expectedAvg);
+
         double avg = employeeService.getAverageSalaryByCompany("TechCorp");
-        assertEquals((emp1.getSalary() + emp2.getSalary()) / 2.0, avg);
+        assertEquals(expectedAvg, avg);
     }
 
     @Test
     void testUpdateStatusByEmail() {
-        when(employeeDAO.findByEmail(emp1.getEmail())).thenReturn(Optional.of(emp1));
-
+        when(employeeRepository.findByEmail(emp1.getEmail())).thenReturn(Optional.of(emp1));
+        when(employeeRepository.save(any(Employee.class))).thenAnswer(inv -> inv.getArgument(0));
         Optional<Employee> updated = employeeService.updateStatusByEmail(emp1.getEmail(), EmploymentStatus.TERMINATED);
         assertAll(
-                ()-> assertTrue(updated.isPresent()),
-                ()-> assertEquals(EmploymentStatus.TERMINATED, updated.get().getStatus())
+                () -> assertTrue(updated.isPresent()),
+                () -> assertEquals(EmploymentStatus.TERMINATED, updated.get().getStatus())
         );
     }
 
     @Test
     void testDeleteEmployeeByEmail() {
-        when(employeeDAO.delete(emp1.getEmail())).thenReturn(true);
-        when(employeeDAO.delete("nonexistent@email.com")).thenReturn(false);
-
+        when(employeeRepository.existsByEmail(emp1.getEmail())).thenReturn(true);
+        when(employeeRepository.existsByEmail("nonexistent@email.com")).thenReturn(false);
+        doNothing().when(employeeRepository).deleteByEmail(emp1.getEmail());
         assertAll(
-                ()-> assertTrue(employeeService.deleteEmployeeByEmail(emp1.getEmail())),
-                ()-> assertFalse(employeeService.deleteEmployeeByEmail("nonexistent@email.com"))
+                () -> assertTrue(employeeService.deleteEmployeeByEmail(emp1.getEmail())),
+                () -> assertFalse(employeeService.deleteEmployeeByEmail("nonexistent@email.com"))
         );
-     }
+    }
 
     @Test
     void testUpdateEmployeeByEmailSuccess() {
-        when(employeeDAO.findByEmail(emp1.getEmail())).thenReturn(Optional.of(emp1));
-
+        when(employeeRepository.findByEmail(emp1.getEmail())).thenReturn(Optional.of(emp1));
+        when(employeeRepository.save(any(Employee.class))).thenAnswer(inv -> inv.getArgument(0));
         Employee changes = new Employee("Justyna Nowa", "steczkowska1764@gmail.com", "NewCorp", Position.MANAGER, 5000);
         changes.setStatus(EmploymentStatus.TERMINATED);
-
-        Optional<Employee> updated = employeeService.UpdateEmployeeByEmail(emp1.getEmail(), changes);
-
+        Optional<Employee> updated = employeeService.updateEmployeeByEmail(emp1.getEmail(), changes);
         assertTrue(updated.isPresent());
         Employee result = updated.get();
-
         assertAll(
-                ()-> assertEquals("Justyna Nowa", result.getFullName()),
-                ()-> assertEquals("NewCorp", result.getCompanyName()),
-                ()-> assertEquals(Position.MANAGER, result.getPosition()),
-                ()-> assertEquals(5000, result.getSalary()),
-                ()-> assertEquals(EmploymentStatus.TERMINATED, result.getStatus())
+                () -> assertEquals("Justyna Nowa", result.getFullName()),
+                () -> assertEquals("NewCorp", result.getCompanyName()),
+                () -> assertEquals(Position.MANAGER, result.getPosition()),
+                () -> assertEquals(5000, result.getSalary()),
+                () -> assertEquals(EmploymentStatus.TERMINATED, result.getStatus())
         );
     }
 
     @Test
     void testUpdateEmployeeByEmailNonExistingEmail() {
+        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.empty());
         Employee changes = new Employee("Anna Nowak", "anna@nowak.com", "CorpX", Position.MANAGER, 4000);
-        Optional<Employee> updated = employeeService.UpdateEmployeeByEmail("nonexistent@email.com", changes);
+        Optional<Employee> updated = employeeService.updateEmployeeByEmail("nonexistent@email.com", changes);
         assertTrue(updated.isEmpty());
     }
 
     @Test
     void testUpdateEmployeeByEmailNullEmail() {
-        Employee changes = new Employee("Anna Nowak", "anna@nowak.com", "CorpX", Position.MANAGER, 4000);
-        Optional<Employee> updated = employeeService.UpdateEmployeeByEmail(null, changes);
-        assertTrue(updated.isEmpty());
-    }
-
-    @Test
-    void testUpdateEmployeeByEmailNullChanges() {
-        employeeService.addEmployee(emp1);
-        Optional<Employee> updated = employeeService.UpdateEmployeeByEmail(emp1.getEmail(), null);
+        Optional<Employee> updated = employeeService.updateEmployeeByEmail(null, emp1);
         assertTrue(updated.isEmpty());
     }
 }

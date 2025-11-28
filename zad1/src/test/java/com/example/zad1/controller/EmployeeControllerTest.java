@@ -175,7 +175,7 @@ public class EmployeeControllerTest {
         var updated = makeEmployee("Justyna Steczkowska", "steczkowska1764@gmail.com", "TechCorp", Position.WICEPREZES, 17000, EmploymentStatus.ON_LEAVE);
 
         when(employeeService.getEmployeeByEmail("steczkowska1764@gmail.com")).thenReturn(Optional.of(emp1));
-        when(employeeService.UpdateEmployeeByEmail(Mockito.eq("steczkowska1764@gmail.com"), Mockito.any(Employee.class)))
+        when(employeeService.updateEmployeeByEmail(Mockito.eq("steczkowska1764@gmail.com"), Mockito.any(Employee.class)))
                 .thenReturn(Optional.of(updated));
 
         Map<String, Object> body = Map.of(

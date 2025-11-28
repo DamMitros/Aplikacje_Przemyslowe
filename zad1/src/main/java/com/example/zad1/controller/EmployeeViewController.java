@@ -1,5 +1,6 @@
 package com.example.zad1.controller;
 
+import com.example.zad1.dto.EmployeeListView;
 import com.example.zad1.model.Employee;
 import com.example.zad1.model.EmploymentStatus;
 import com.example.zad1.model.ImportSummary;
@@ -10,6 +11,8 @@ import com.example.zad1.service.FileStorageService;
 import com.example.zad1.service.ImportService;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -37,8 +40,16 @@ public class EmployeeViewController {
     }
 
     @GetMapping
-    public String listEmployees(Model model) {
-        model.addAttribute("employees", employeeService.getAllEmployees());
+    public String listEmployees(Model model,
+                                @RequestParam(defaultValue="0") int page,
+                                @RequestParam(defaultValue="10") int size){
+        Page<EmployeeListView> employeePage = employeeService.getEmployeesList(PageRequest.of(page, size));
+
+        model.addAttribute("employees", employeePage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", employeePage.getTotalPages());
+        model.addAttribute("totalItems", employeePage.getTotalElements());
+
         return "employees/list";
     }
 
@@ -98,7 +109,7 @@ public class EmployeeViewController {
             return "employees/edit-form";
         }
 
-        employeeService.UpdateEmployeeByEmail(employee.getEmail(), employee);
+        employeeService.updateEmployeeByEmail(employee.getEmail(), employee);
         redirectAttributes.addFlashAttribute("message", "Dane pracownika zaktualizowane.");
         return "redirect:/employees";
     }
@@ -116,9 +127,13 @@ public class EmployeeViewController {
     }
 
     @PostMapping("/search")
-    public String searchEmployees(@RequestParam("company") String company, Model model) {
-        List<Employee> results = employeeService.getEmployeeByCompany(company);
-        model.addAttribute("results", results);
+    public String searchEmployees(@RequestParam(required = false) String company,
+                                  @RequestParam(required = false) Integer minSalary,
+                                  @RequestParam(required = false) Integer maxSalary,
+                                  Model model) {
+        Page<Employee> results = employeeService.searchEmployees(company, minSalary, maxSalary, PageRequest.of(0, 50));
+
+        model.addAttribute("results", results.getContent());
         model.addAttribute("companyQuery", company);
         return "employees/search-results";
     }

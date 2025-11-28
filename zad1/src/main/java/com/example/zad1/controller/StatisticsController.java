@@ -42,17 +42,17 @@ public class StatisticsController {
     }
 
     @GetMapping("/positions")
-    public ResponseEntity<Map<String, Integer>> positions() {
-        Map<Position, Integer> counts = employees.countByPosition();
-        Map<String, Integer> out = new LinkedHashMap<>();
+    public ResponseEntity<Map<String, Long>> positions() {
+        Map<Position, Long> counts = employees.countByPosition();
+        Map<String, Long> out = new LinkedHashMap<>();
         counts.forEach((k, v) -> out.put(k != null ? k.name() : "UNKNOWN", v));
         return ResponseEntity.ok(out);
     }
 
     @GetMapping("/status")
-    public ResponseEntity<Map<String, Integer>> statusDistribution() {
-        Map<EmploymentStatus, Integer> counts = employees.countByStatus();
-        Map<String, Integer> out = new LinkedHashMap<>();
+    public ResponseEntity<Map<String, Long>> statusDistribution() {
+        Map<EmploymentStatus, Long> counts = employees.countByStatus();
+        Map<String, Long> out = new LinkedHashMap<>();
         counts.forEach((k, v) -> out.put(k != null ? k.name() : "UNKNOWN", v));
         return ResponseEntity.ok(out);
     }

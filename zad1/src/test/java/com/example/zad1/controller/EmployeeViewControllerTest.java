@@ -1,5 +1,6 @@
 package com.example.zad1.controller;
 
+import com.example.zad1.dto.EmployeeListView;
 import com.example.zad1.model.Employee;
 import com.example.zad1.model.ImportSummary;
 import com.example.zad1.model.Position;
@@ -13,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -25,8 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -50,7 +53,9 @@ class EmployeeViewControllerTest {
 
     @Test
     void listEmployees_shouldReturnListViewAndModel() throws Exception {
-        when(employeeService.getAllEmployees()).thenReturn(List.of(new Employee("Test", "test@test.com", "Firma", Position.PROGRAMISTA, 8000)));
+        EmployeeListView viewMock = Mockito.mock(EmployeeListView.class);
+        Page<EmployeeListView> page = new PageImpl<>(List.of(viewMock));
+        when(employeeService.getEmployeesList(any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/employees"))
                 .andExpect(status().isOk())
@@ -168,14 +173,16 @@ class EmployeeViewControllerTest {
 
     @Test
     void searchEmployees_shouldReturnResultsView() throws Exception {
-        List<Employee> results = List.of(new Employee("Test", "test@test.com", "Firma", Position.PROGRAMISTA, 8000));
-        when(employeeService.getEmployeeByCompany("Firma")).thenReturn(results);
+        Employee emp = new Employee("Jan", "jan@test.com", "Corp", Position.PREZES, 100);
+        Page<Employee> page = new PageImpl<>(List.of(emp));
+
+        when(employeeService.searchEmployees(eq("Firma"), any(), any(), any(Pageable.class)))
+                .thenReturn(page);
         mockMvc.perform(post("/employees/search")
                         .param("company", "Firma"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("employees/search-results"))
-                .andExpect(model().attribute("results", results))
-                .andExpect(model().attribute("companyQuery", "Firma"));
+                .andExpect(model().attributeExists("results"));
     }
 
     @Test

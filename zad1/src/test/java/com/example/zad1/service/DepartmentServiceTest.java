@@ -1,7 +1,7 @@
 package com.example.zad1.service;
 
-import com.example.zad1.dao.DepartmentDAO;
 import com.example.zad1.model.Department;
+import com.example.zad1.repository.DepartmentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,30 +20,40 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class DepartmentServiceTest {
     @Mock
-    private DepartmentDAO departmentDAO;
+    private DepartmentRepository departmentRepository;
 
     @InjectMocks
     private DepartmentService departmentService;
 
     @BeforeEach
     void setUp() {
-        departmentService.addDepartment(new Department(null, "IT", "TechCorp", "Gdańsk", 10000, "steczka@example.com"));
-        departmentService.addDepartment(new Department(null, "Sales", "TechCorp", "Gdańsk", 100000, "manager@example.com"));
+        departmentService.addDepartment(new Department("IT", "TechCorp", "Gdańsk", 10000, "steczka@example.com"));
+        departmentService.addDepartment(new Department("Sales", "TechCorp", "Gdańsk", 100000, "manager@example.com"));
     }
 
     @Test
     void addDepartment_shouldAssignIdAndStore() {
-        Department newDept = new Department(null, "R&D", "TechCorp", "Gdynia", 250000, "rnd@example.com");
-        when(departmentDAO.save(any(Department.class))).thenReturn(newDept);
-        Department saved = departmentService.addDepartment(newDept);
+        Department input = new Department();
+        input.setName("Test");
 
-        assertNotNull(saved);
+        Department saved = new Department();
+        saved.setId(1L);
+        saved.setName("Test");
+
+        when(departmentRepository.save(any(Department.class))).thenReturn(saved);
+
+        Department result = departmentService.addDepartment(input);
+
+        assertAll(
+                ()-> assertNotNull(result),
+                ()-> assertEquals(1L, result.getId())
+        );
     }
 
     @Test
     void getDepartmentById_shouldReturnStoredDepartment() {
-         Department dept = new Department(2L, "Sales", "TechCorp", "Gdańsk", 100000, "manager@example.com");
-         when(departmentDAO.findById(2L)).thenReturn(Optional.of(dept));
+         Department dept = new Department("Sales", "TechCorp", "Gdańsk", 100000, "manager@example.com");
+         when(departmentRepository.findById(2L)).thenReturn(Optional.of(dept));
          Optional<Department> found = departmentService.getDepartmentById(2L);
          assertAll(
                 () -> assertTrue(found.isPresent()),
@@ -53,7 +63,7 @@ class DepartmentServiceTest {
 
     @Test
     void getDepartmentById_shouldReturnEmptyForUnknownId() {
-        when(departmentDAO.findById(999L)).thenReturn(Optional.empty());
+        when(departmentRepository.findById(999L)).thenReturn(Optional.empty());
 
         Optional<Department> dept = departmentService.getDepartmentById(999L);
         assertTrue(dept.isEmpty());
@@ -61,7 +71,7 @@ class DepartmentServiceTest {
 
     @Test
     void getAllDepartments_shouldReturnAll() {
-        when(departmentDAO.findAll()).thenReturn(List.of(new Department(), new Department()));
+        when(departmentRepository.findAll()).thenReturn(List.of(new Department(), new Department()));
 
         Collection<Department> departments = departmentService.getAllDepartments();
         assertEquals(2, departments.size());
@@ -69,12 +79,12 @@ class DepartmentServiceTest {
 
     @Test
     void updateDepartment_shouldUpdateIfFound() {
-        Department existing = new Department(1L, "IT", "TechCorp", "Warsaw", 500000, "oldmanager@test.com");
-        when(departmentDAO.findById(1L)).thenReturn(Optional.of(existing));
-        when(departmentDAO.save(any(Department.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        Department changes = new Department(null, "Information Technology", "TechnoCorp", "Warszawa-Centrum", 550000, "newmanager@test.com");
+        Department existing = new Department("IT", "TechCorp", "Warsaw", 500000, "oldmanager@test.com");
+        when(departmentRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(departmentRepository.save(any(Department.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Department changes = new Department("Information Technology", "TechnoCorp", "Warszawa-Centrum", 550000, "newmanager@test.com");
 
-        when(departmentDAO.findById(1L)).thenReturn(Optional.of(existing));
+        when(departmentRepository.findById(1L)).thenReturn(Optional.of(existing));
         departmentService.updateDepartment(1L, changes);
 
         assertAll(
@@ -86,7 +96,7 @@ class DepartmentServiceTest {
     @Test
     void updateDepartment_shouldReturnEmptyForUnknownId() {
         Department changes = new Department();
-        when(departmentDAO.findById(999L)).thenReturn(Optional.empty());
+        when(departmentRepository.findById(999L)).thenReturn(Optional.empty());
 
         Optional<Department> updated = departmentService.updateDepartment(999L, changes);
         assertTrue(updated.isEmpty());
@@ -94,7 +104,7 @@ class DepartmentServiceTest {
 
     @Test
     void deleteDepartment_shouldRemoveDepartment() {
-        when(departmentDAO.delete(1L)).thenReturn(true);
+        when(departmentRepository.existsById(1L)).thenReturn(true);
         boolean result = departmentService.deleteDepartment(1L);
 
         assertTrue(result);

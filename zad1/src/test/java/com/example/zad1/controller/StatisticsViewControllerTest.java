@@ -44,7 +44,6 @@ class StatisticsViewControllerTest {
         when(employeeService.getAverageSalary()).thenReturn(5000.0);
         when(departmentService.getAllDepartments()).thenReturn(List.of());
         when(employeeService.getCompanyStatistics()).thenReturn(Map.of("Firma", new CompanyStatistics("TechCorp", 1,5000.0,"Test",5000)));
-        when(employeeService.countByPosition()).thenReturn(Map.of(Position.PROGRAMISTA,1));
 
         mockMvc.perform(get("/statistics"))
                 .andExpect(status().isOk())

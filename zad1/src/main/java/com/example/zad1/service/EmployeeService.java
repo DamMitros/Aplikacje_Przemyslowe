@@ -1,107 +1,126 @@
 package com.example.zad1.service;
 
-import com.example.zad1.dao.EmployeeDAO;
+import com.example.zad1.dto.EmployeeListView;
 import com.example.zad1.model.CompanyStatistics;
 import com.example.zad1.model.Employee;
 import com.example.zad1.model.Position;
 import com.example.zad1.model.EmploymentStatus;
+import com.example.zad1.repository.DepartmentRepository;
+import com.example.zad1.repository.EmployeeRepository;
+import com.example.zad1.specification.EmployeeSpecification;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class EmployeeService {
-    private final EmployeeDAO employeeDAO;
+    private final EmployeeRepository employeeRepository;
+    private final DepartmentRepository departmentRepository;
 
-    public EmployeeService(EmployeeDAO employeeDAO) {
-        this.employeeDAO = employeeDAO;
+    public EmployeeService(EmployeeRepository employeeRepository, DepartmentRepository departmentRepository) {
+        this.employeeRepository = employeeRepository;
+        this.departmentRepository = departmentRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<EmployeeListView> getEmployeesList(Pageable pageable) {
+        return employeeRepository.findAllProjectedBy(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Employee> searchEmployees(String company, Integer minSalary, Integer maxSalary, Pageable pageable) {
+        return employeeRepository.findAll(EmployeeSpecification.filterBy(company, minSalary, maxSalary), pageable);
+    }
+
+    public Optional<Employee> getEmployeeByEmail(String email) {
+        return employeeRepository.findByEmail(email);
+    }
+
+    public List<Employee> getAllEmployees(){
+        return employeeRepository.findAll();
     }
 
     @Transactional
     public boolean addEmployee(Employee employee){
-        if (employee==null || employee.getEmail()==null || employee.getEmail().isBlank())
-            return false;
-        if (employeeDAO.findByEmail(employee.getEmail()).isPresent()) {
+        if (employee==null || employee.getEmail()==null || employee.getEmail().isBlank() || employeeRepository.existsByEmail(employee.getEmail())){
             return false;
         }
-        employeeDAO.save(employee);
+        if (employee.getDepartmentId()!=null){
+            departmentRepository.findById(employee.getDepartmentId())
+                    .ifPresent(employee::setDepartment);
+        }
+        employeeRepository.save(employee);
         return true;
     }
 
-    public List<Employee> getAllEmployees(){
-        return employeeDAO.findAll();
-    }
-
-    public Optional<Employee> getEmployeeByEmail(String email) {
-        if (email == null || email.isBlank()) return Optional.empty();
-        return employeeDAO.findByEmail(email);
-    }
-
-    public Optional<Employee> UpdateEmployeeByEmail(String email, Employee changes) {
-        Optional<Employee> existing = employeeDAO.findByEmail(email);
-        if (existing.isPresent()) {
-            Employee emp = existing.get();
-            emp.setFullName(changes.getFullName());
-            emp.setCompanyName(changes.getCompanyName());
-            emp.setPosition(changes.getPosition());
-            emp.setSalary(changes.getSalary());
-            emp.setStatus(changes.getStatus());
-            emp.setDepartmentId(changes.getDepartmentId());
-
-            employeeDAO.save(emp);
-            return Optional.of(emp);
-        }
-        return Optional.empty();
-    }
-
     @Transactional
-    public Optional<Employee> updateStatusByEmail(String email, EmploymentStatus status){
-        Optional<Employee> existing = employeeDAO.findByEmail(email);
-        if (existing.isPresent()) {
-            Employee emp = existing.get();
-            emp.setStatus(status);
-            employeeDAO.save(emp);
-            return Optional.of(emp);
-        }
-        return Optional.empty();
+    public Optional<Employee> updateEmployeeByEmail(String email, Employee changes) {
+        if (email == null || changes == null) return Optional.empty();
+        return employeeRepository.findByEmail(email).map(existing -> {
+            existing.setFullName(changes.getFullName());
+            existing.setCompanyName(changes.getCompanyName());
+            existing.setPosition(changes.getPosition());
+            existing.setSalary(changes.getSalary());
+            existing.setStatus(changes.getStatus());
+            existing.setDepartmentId(changes.getDepartmentId());
+
+            departmentRepository.findById(existing.getDepartmentId())
+                    .ifPresent(existing::setDepartment);
+
+            return employeeRepository.save(existing);
+        });
     }
 
     @Transactional
     public boolean deleteEmployeeByEmail(String email) {
-        return employeeDAO.delete(email);
+        if (employeeRepository.existsByEmail(email)) {
+            employeeRepository.deleteByEmail(email);
+            return true;
+        }
+        return false;
+    }
+
+    @Transactional
+    public Optional<Employee> updateStatusByEmail(String email, EmploymentStatus status){
+        return employeeRepository.findByEmail(email).map(e -> {
+            e.setStatus(status);
+            return employeeRepository.save(e);
+        });
+    }
+
+    @Transactional
+    public void deleteAll() {
+        employeeRepository.deleteAll();
     }
 
     @Transactional(readOnly = true)
     public Map<String, CompanyStatistics> getCompanyStatistics() {
-        List<CompanyStatistics> statsList = employeeDAO.getCompanyStatistics();
+        List<CompanyStatistics> statsList = employeeRepository.getCompanyStatisticsJPQL();
 
         return statsList.stream()
-                .collect(java.util.stream.Collectors.toMap(
+                .collect(Collectors.toMap(
                         CompanyStatistics::getCompanyName,
                         stat -> stat
                 ));
     }
 
-    public List<Employee> getEmployeeByCompany(String companyName){
-        if (companyName==null) return Collections.emptyList();
-        return getAllEmployees().stream()
-                .filter(emp -> companyName.equalsIgnoreCase(emp.getCompanyName()))
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public List<Employee> getEmployeeByCompany(String company) {
+        return employeeRepository.findAll(EmployeeSpecification.filterBy(company, null, null));
     }
 
+    @Transactional(readOnly = true)
     public double getAverageSalary() {
-        return getAllEmployees().stream()
-                .mapToInt(Employee::getSalary)
-                .average()
-                .orElse(0.0);
+        return employeeRepository.getAverageSalaryJPQL();
     }
 
-    public double getAverageSalaryByCompany(String companyName) {
-        return getEmployeeByCompany(companyName).stream()
-                .mapToInt(Employee::getSalary)
-                .average().orElse(0.0);
+    @Transactional(readOnly = true)
+    public double getAverageSalaryByCompany(String company) {
+        return employeeRepository.getAverageSalaryByCompanyJPQL(company);
     }
 
     public Optional<Employee> getHighestSalary() {
@@ -109,8 +128,8 @@ public class EmployeeService {
                 .max(Comparator.comparingInt(Employee::getSalary));
     }
 
-    public List<Employee> validateSalaryConsistency(){
-        return getAllEmployees().stream()
+    public List<Employee> validateSalaryConsistency() {
+        return employeeRepository.findAll().stream()
                 .filter(Objects::nonNull)
                 .filter(emp -> emp.getPosition() != null)
                 .filter(emp -> emp.getSalary() < emp.getPosition().getSalary())
@@ -122,27 +141,29 @@ public class EmployeeService {
                 .collect(Collectors.groupingBy(Employee::getPosition));
     }
 
-    public Map<Position, Integer> countByPosition(){
-        return getAllEmployees().stream()
-                .collect(Collectors.groupingBy(
-                        Employee::getPosition,
-                        Collectors.summingInt(e -> 1)
-                ));
+    @Transactional(readOnly = true)
+    public Map<Position, Long> countByPosition() {
+        List<Object[]> results = employeeRepository.countByPositionJPQL();
+        Map<Position, Long> map = new LinkedHashMap<>();
+        for (Object[] row : results) {
+            map.put((Position) row[0], (Long) row[1]);
+        }
+        return map;
     }
 
-    public Map<EmploymentStatus, Integer> countByStatus() {
-        return getAllEmployees().stream()
-                .collect(Collectors.groupingBy(
-                        Employee::getStatus,
-                        Collectors.summingInt(e -> 1)
-                ));
+    @Transactional(readOnly = true)
+    public Map<EmploymentStatus, Long> countByStatus() {
+        List<Object[]> results = employeeRepository.countByStatusJPQL();
+        Map<EmploymentStatus, Long> map = new LinkedHashMap<>();
+        for (Object[] row : results) {
+            map.put((EmploymentStatus) row[0], (Long) row[1]);
+        }
+        return map;
     }
 
+    @Transactional(readOnly = true)
     public List<Employee> getByStatus(EmploymentStatus status) {
-        if (status == null) return Collections.emptyList();
-        return getAllEmployees().stream()
-                .filter(e -> e.getStatus() == status)
-                .collect(Collectors.toList());
+        return employeeRepository.findByStatus(status);
     }
 
     public List<Employee> getAllAlphabetically(){
@@ -159,10 +180,5 @@ public class EmployeeService {
             return;
         }
         getAllEmployees().forEach(System.out::println);
-    }
-
-    @Transactional
-    public void deleteAll() {
-        employeeDAO.deleteAll();
     }
 }

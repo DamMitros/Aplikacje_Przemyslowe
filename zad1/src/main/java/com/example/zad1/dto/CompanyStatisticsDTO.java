@@ -4,7 +4,7 @@ import com.example.zad1.model.CompanyStatistics;
 
 public class CompanyStatisticsDTO {
     private String companyName;
-    private int employeeCount;
+    private long employeeCount;
     private double averageSalary;
     private int highestSalary;
     private String topEarnerFullName;
@@ -27,7 +27,7 @@ public class CompanyStatisticsDTO {
         this.companyName = companyName;
     }
 
-    public int getEmployeeCount() {
+    public long getEmployeeCount() {
         return employeeCount;
     }
 

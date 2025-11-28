@@ -1,10 +1,16 @@
 package com.example.zad1.model;
 
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
-import jakarta.validation.constraints.Min;
+import java.util.List;
 
+@Entity
+@Table(name = "departments")
 public class Department {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotEmpty(message = "Nazwa departamentu jest wymagana")
@@ -21,10 +27,13 @@ public class Department {
     private double budget;
 
     private String managerEmail;
+
+    @OneToMany(mappedBy = "department")
+    private List<Employee> employees;
+
     public Department() {}
 
-    public Department(Long id, String name, String companyName, String location, double budget, String managerEmail) {
-        this.id = id;
+    public Department(String name, String companyName, String location, double budget, String managerEmail) {
         this.name = name;
         this.companyName = companyName;
         this.location = location;
