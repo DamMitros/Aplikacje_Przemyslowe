@@ -1,12 +1,33 @@
 package com.example.zad1.dto;
 
+import com.example.zad1.validation.TechCorpEmail;
+import jakarta.validation.constraints.*;
+
 public class EmployeeDTO {
+    @NotEmpty(message = "Imię jest wymagane")
+    @Size(min = 2, message="Imię musi mieć co najmniej 2 znaki")
     private String firstName;
+
+    @NotEmpty(message="Nazwisko jest wymagane")
+    @Size(min=2, message = "Nazwisko musi mieć co najmniej 2 znaki")
     private String lastName;
+
+    @NotEmpty(message="Email jest wymagany")
+    @Email(message = "Nieprawidłowy format adresu email")
+    @TechCorpEmail(message = "Tylko adresy w domenie @techcorp.com sa akceptowane")
     private String email;
+
+    @NotEmpty(message = "Nazwa firmy jest wymagana")
     private String company;
+
+    @NotEmpty(message = "Stanowisko jest wymagane")
     private String position;
+
+    @Positive(message = "Pensja musi być wartośćią dodatnią")
+    @NotNull(message = "Pensja jest wymagana")
     private Integer salary;
+
+    @NotEmpty(message = "Status jest wymagany")
     private String status;
 
     public EmployeeDTO() {}

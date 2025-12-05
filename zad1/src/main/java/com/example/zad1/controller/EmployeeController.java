@@ -8,6 +8,7 @@ import com.example.zad1.model.Employee;
 import com.example.zad1.model.EmploymentStatus;
 import com.example.zad1.model.Position;
 import com.example.zad1.service.EmployeeService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -43,10 +44,7 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public ResponseEntity<EmployeeDTO> create(@RequestBody EmployeeDTO dto) {
-        if (dto == null || dto.getEmail() == null || dto.getEmail().isBlank()) {
-            throw new InvalidDataException("Email is required");
-        }
+    public ResponseEntity<EmployeeDTO> create(@Valid @RequestBody EmployeeDTO dto) {
         if (employees.getEmployeeByEmail(dto.getEmail()).isPresent()) {
             throw new DuplicateEmailException(dto.getEmail());
         }
@@ -64,10 +62,7 @@ public class EmployeeController {
     }
 
     @PutMapping("/{email}")
-    public ResponseEntity<EmployeeDTO> update(@PathVariable String email, @RequestBody EmployeeDTO dto) {
-        if (dto == null) {
-            throw new InvalidDataException("Body is required");
-        }
+    public ResponseEntity<EmployeeDTO> update(@PathVariable String email, @Valid @RequestBody EmployeeDTO dto) {
         if (dto.getEmail() != null && !email.equalsIgnoreCase(dto.getEmail())) {
             throw new InvalidDataException("Email in path and body must match");
         }

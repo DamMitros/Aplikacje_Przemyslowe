@@ -11,12 +11,16 @@ import com.example.zad1.specification.EmployeeSpecification;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 @Service
+@Validated
 public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final DepartmentRepository departmentRepository;
@@ -45,7 +49,7 @@ public class EmployeeService {
     }
 
     @Transactional
-    public boolean addEmployee(Employee employee){
+    public boolean addEmployee(@Valid Employee employee){
         if (employee==null || employee.getEmail()==null || employee.getEmail().isBlank() || employeeRepository.existsByEmail(employee.getEmail())){
             return false;
         }

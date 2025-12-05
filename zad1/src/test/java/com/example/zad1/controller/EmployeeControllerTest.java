@@ -199,7 +199,15 @@ public class EmployeeControllerTest {
     @Test
     @DisplayName("PUT /api/employees/{email} - 400 when email mismatch")
     void update_shouldReturn400WhenEmailMismatch() throws Exception {
-        Map<String, Object> body = Map.of("email", "other@example.com");
+        Map<String, Object> body = Map.of(
+                "firstName", "Jan",
+                "lastName", "Testowy",
+                "email", "other@example.com",
+                "company", "TechCorp",
+                "position", "MANAGER",
+                "salary", 5000,
+                "status", "ACTIVE"
+        );
 
         mockMvc.perform(put("/api/employees/{email}", "jan@example.com")
                         .contentType("application/json")
@@ -282,7 +290,7 @@ public class EmployeeControllerTest {
                         .contentType("application/json")
                         .content(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(body)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+                .andExpect(jsonPath("$.email").exists());
     }
 
     @Test
@@ -319,15 +327,20 @@ public class EmployeeControllerTest {
     @Test
     @DisplayName("PUT /api/employees/{email} - 404 when employee not found")
     void update_nonExistingEmployee_shouldReturn404() throws Exception {
-        when(employeeService.getEmployeeByEmail("missing@example.com")).thenReturn(Optional.empty());
+        String nonExistingEmail = "missing@techcorp.com";
+        when(employeeService.getEmployeeByEmail(nonExistingEmail)).thenReturn(Optional.empty());
 
         Map<String, Object> body = Map.of(
-                "email", "missing@example.com",
-                "firstName", "X",
-                "lastName", "Y"
+                "email", nonExistingEmail,
+                "firstName", "Jacek",
+                "lastName", "Biedroń",
+                "company", "TechCorp",
+                "position", "MANAGER",
+                "salary", 5000,
+                "status", "ACTIVE"
         );
 
-        mockMvc.perform(put("/api/employees/{email}", "missing@example.com")
+        mockMvc.perform(put("/api/employees/{email}", nonExistingEmail)
                         .contentType("application/json")
                         .content(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(body)))
                 .andExpect(status().isNotFound())
@@ -407,7 +420,7 @@ public class EmployeeControllerTest {
                 "email", email,
                 "company", "TechCorp",
                 "position", "PREZES",
-                "salary", 0,
+                "salary", 100,
                 "status", "ACTIVE"
         );
         when(employeeService.getEmployeeByEmail(email)).thenReturn(Optional.empty());
